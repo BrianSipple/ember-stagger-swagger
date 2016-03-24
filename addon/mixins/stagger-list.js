@@ -54,7 +54,7 @@ export default Mixin.create({
   /* MILLESECONDS */
   staggerInterval: null,
 
-  onStaggerComplete: null,
+  _onStaggerComplete: null,
   staggerDirection: null,
 
 
@@ -106,7 +106,7 @@ export default Mixin.create({
   _initStaggerAnimationFunction () {
 
     /* AnimationEvent listener to handle keeping the list items hidden */
-    this.onStaggerComplete = function onStaggerComplete (event) {
+    this._onStaggerComplete = function onStaggerComplete (event) {
 
       // only update the DOM after we've finished animating all items
       const lastListItemElem = this.element.lastElementChild;

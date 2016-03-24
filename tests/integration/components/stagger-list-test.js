@@ -1,6 +1,6 @@
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
-import getNode from 'tests/helpers/integration/get-node';
+import getNode from '../../helpers/integration/get-node';
 
 let actual, expected;
 
@@ -40,7 +40,7 @@ test('rendering', function(assert) {
   this.render(hbs`{{stagger-list}}`);
 
   expected = '';
-  actual = getNode(this).textContent;
+  actual = getNode(this).textContent.trim();
   assert.equal(actual, expected);
 
   // Template block usage:
@@ -51,15 +51,35 @@ test('rendering', function(assert) {
   `);
 
   expected = 'template block text';
-  actual = getNode(this).textContent;
+  actual = getNode(this).textContent.trim();
   assert.equal(actual, expected);
+});
+
+test(`properly setting the \`itemsHidden\` upon insersiton based
+  upon the value of \`showItems\``, function (assert) {
+  
 });
 
 
 // test('choosing the animation direction', function (assert) {
 //
-// });
+//   this.render(hbs`
+//     {{#stagger-list}}
+//       <li>Seattle</li>
+//       <li>New York City</li>
+//       <li>Boston</li>
+//     {{/stagger-list}}
+//   `);
 //
+//   expected =
+//
+//   run(() => {
+//     this.set('showItems', true);
+//   });
+//
+//
+// });
+
 //
 // test(`toggling the element's class hooks when the
 // value of the \`itemsShowing\` attribute changes`, function (assert) {
