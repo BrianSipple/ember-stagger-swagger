@@ -1,0 +1,29 @@
+@import '._easings.css';
+@import '._durations.css';
+
+._ember-stagger-swagger-stagger-list {
+
+  &.items-hidden {
+    > * {
+      transform: translate3d(-100%, 0, 0);
+    }
+  }
+
+  &.items-showing {
+    > * {
+      animation: _EmberStaggerSwagger__SlideAndFadeInFromLeft;
+      animation-duration: var(--anim-duration__slide-element);
+      animation-timing-function: var(--easing__ease-out-cubic);
+      animation-fill-mode: forwards;
+    }
+  }
+
+  &.items-collapsing {
+    > * {
+      animation: _EmberStaggerSwagger__SlideAndFadeOutRight;
+      animation-duration: var(--anim-duration__slide-element);
+      animation-timing-function: var(--easing__ease-out-cubic);
+      animation-fill-mode: forwards;
+    }
+  }
+}

@@ -2,5 +2,7 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-stagger-swagger'
+  name: 'ember-stagger-swagger',
+
+  normalizeEntityName: function () {}
 };

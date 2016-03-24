@@ -1,6 +1,6 @@
 {
   "name": "ember-stagger-swagger",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
     "doc": "doc",
@@ -9,13 +9,13 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:testall"
+    "test": "ember try:each"
   },
-  "repository": "",
+  "repository": "https://github.com/BrianSipple/ember-stagger-swagger",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Brian Sipple <@Brian_Sipple>",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.2.0",
@@ -30,7 +30,6 @@
     "ember-cli-release": "0.2.8",
     "ember-cli-sri": "^2.1.0",
     "ember-cli-uglify": "^1.2.0",
-    "ember-data": "^2.4.0",
     "ember-disable-prototype-extensions": "^1.1.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.4",
@@ -40,7 +39,12 @@
     "loader.js": "^4.0.0"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "ember animation",
+    "ember animation addon",
+    "ember animation mixin",
+    "stagger animation",
+    "list animation"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.5"
