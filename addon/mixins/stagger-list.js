@@ -28,26 +28,26 @@ const CLASS_NAMES = {
 const ANIMATION_NAME_MAP = {
   left: {
     in: 'SlideAndFadeInFromRight',
-    out 'SlideAndFadeOutRight',
+    out: 'SlideAndFadeOutRight',
   },
   down: {
     in: 'SlideAndFadeInFromTop',
-    out 'SlideAndFadeOutUp',
+    out: 'SlideAndFadeOutUp',
   },
   right: {
     in: 'SlideAndFadeInFromLeft',
-    out 'SlideAndFadeOutLeft',
+    out: 'SlideAndFadeOutLeft',
   },
   up: {
     in: 'SlideAndFadeInFromBottom',
-    out 'SlideAndFadeOutDown',
+    out: 'SlideAndFadeOutDown',
   },
 };
 
 export default Mixin.create({
 
   tagName: 'ul',
-  classNames: ['_ember-stagger-swagger-stagger-list'],
+  classNames: ['_ember-stagger-swagger_stagger-list'],
 
   showItems: false,
 
@@ -60,6 +60,7 @@ export default Mixin.create({
 
   init () {
     this._super(...arguments);
+
     if (!this.staggerInterval || Number.isNaN(Number(this.staggerInterval)) ) {
       this.staggerInterval = DEFAULT_STAGGER_INTERVAL;
     } else {

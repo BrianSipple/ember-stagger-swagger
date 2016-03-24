@@ -1,7 +1,8 @@
-@import '._easings.css';
-@import '._durations.css';
+@import './_keyframes.css';
+@import './_easings.css';
+@import './_durations.css';
 
-._ember-stagger-swagger-stagger-list {
+._ember-stagger-swagger_stagger-list {
 
   &.items-hidden {
     > * {
