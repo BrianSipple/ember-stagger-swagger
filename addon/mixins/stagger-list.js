@@ -10,7 +10,12 @@
 import Ember from 'ember';
 import crossBrowserize from 'ember-stagger-swagger/utils/cross-browserize-style-object';
 
-const { Mixin, run } = Ember;
+const {
+  Mixin,
+  computed,
+  run,
+  assert,
+} = Ember;
 
 /**
  * 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered
@@ -25,22 +30,29 @@ const CLASS_NAMES = {
   itemsCollapsing: 'items-collapsing',
 };
 
+const STAGGER_DIRECTIONS = {
+  LEFT: 'left',
+  DOWN: 'down',
+  RIGHT: 'right',
+  UP: 'up',
+};
+
 const ANIMATION_NAME_MAP = {
-  left: {
-    in: 'SlideAndFadeInFromRight',
-    out: 'SlideAndFadeOutRight',
+  [STAGGER_DIRECTIONS.LEFT]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
+    out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
   },
-  down: {
-    in: 'SlideAndFadeInFromTop',
-    out: 'SlideAndFadeOutUp',
+  [STAGGER_DIRECTIONS.DOWN]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
+    out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
   },
-  right: {
-    in: 'SlideAndFadeInFromLeft',
-    out: 'SlideAndFadeOutLeft',
+  [STAGGER_DIRECTIONS.RIGHT]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
+    out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
   },
-  up: {
-    in: 'SlideAndFadeInFromBottom',
-    out: 'SlideAndFadeOutDown',
+  [STAGGER_DIRECTIONS.UP]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
+    out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
   },
 };
 
@@ -54,18 +66,43 @@ export default Mixin.create({
   /* MILLESECONDS */
   staggerInterval: null,
 
-  _onStaggerComplete: null,
   staggerDirection: null,
+  inAnimationName: null,
+  outAnimationName: null,
+
+  /**
+   * Callback (to be initialized) for our animationend event listener
+   */
+  _onStaggerComplete: null,
+
+
+  _inAnimationName: computed('inAnimationName', 'staggerDirection', function computeInAnimationName () {
+    return this.get('inAnimationName') || ANIMATION_NAME_MAP[this.get('staggerDirection')].in;
+  }),
+
+  _outAnimationName: computed ('outAnimationName', 'staggerDirection', function computeOutAnimationName () {
+    return this.get('outAnimationName') || ANIMATION_NAME_MAP[this.get('staggerDirection')].out;
+  }),
+
+  currentAnimationName: computed(
+    '_inAnimationName',
+    '_outAnimationName',
+    'showItems',
+    function currentAnimationName() {
+      return this.get('showItems') ? this.get('_inAnimationName') : this.get('_outAnimationName');
+    }
+  ),
 
 
   init () {
     this._super(...arguments);
 
-    if (!this.staggerInterval || Number.isNaN(Number(this.staggerInterval)) ) {
-      this.staggerInterval = DEFAULT_STAGGER_INTERVAL;
-    } else {
-      this.staggerInterval = Math.max(0, Number(this.staggerInterval));
-    }
+    this._initStaggerInterval();
+
+    assert(
+      'stagger-list must have a valid `staggerDirection`',
+      !!this.staggerDirection && !!ANIMATION_NAME_MAP[this.staggerDirection]
+    );
   },
 
 
@@ -73,7 +110,7 @@ export default Mixin.create({
     this._super(...arguments);
 
     this._initStaggerAnimationFunction();
-    run.scheduleOnce('afterRender', this, '_handleInitialDisplay');
+    run.scheduleOnce('afterRender', this, '_setInitialDisplayState');
   },
 
 
@@ -97,6 +134,7 @@ export default Mixin.create({
     const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
 
     run.once(() => {
+      this._setAnimationName(this.get('currentAnimationName'));
       this.element.classList.remove(classToRemove);
       this.element.classList.add(classToAdd);
     });
@@ -121,7 +159,7 @@ export default Mixin.create({
   },
 
 
-  _handleInitialDisplay () {
+  _setInitialDisplayState () {
     if (!this.showItems) {
       this.element.classList.add(CLASS_NAMES.itemsHidden);
     }
@@ -139,11 +177,32 @@ export default Mixin.create({
     let delay;
     Array.from(this.element.children).forEach((listItemElem, idx) => {
       delay = (idx + 1) * interval;
-      crossBrowserize(listItemElem, 'animationDelay', `${delay}ms`);
+      crossBrowserize(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
       listItemElem.style.animationDelay = `${delay}ms`;
     });
   },
 
+  _initStaggerInterval () {
+    if (!this.staggerInterval) {
+      this.staggerInterval = DEFAULT_STAGGER_INTERVAL;
 
+    } else {
+      assert(
+        'stagger interval must be a numeric value greater than 0',
+        !Number.isNaN(Number(this.staggerInterval)) && this.staggerInterval > 0
+      );
+    }
+  },
+
+  _setAnimationName(currentAnimationName) {
+
+    ANIMATION_NAME_PREFIXES.forEach((prefix) => {
+      if (this.element.style[`${prefix}AnimationName`]) {
+        this.element.style[`${prefix}AnimationName`] = currentAnimationName;
+      } else {
+        this.element.style.animationName = currentAnimationName;
+      }
+    });
+  },
 
 });

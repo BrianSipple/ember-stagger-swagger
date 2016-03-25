@@ -12,7 +12,6 @@
 
   &.items-showing {
     > * {
-      animation: _EmberStaggerSwagger__SlideAndFadeInFromLeft;
       animation-duration: var(--anim-duration__slide-element);
       animation-timing-function: var(--easing__ease-out-cubic);
       animation-fill-mode: forwards;
@@ -21,7 +20,6 @@
 
   &.items-collapsing {
     > * {
-      animation: _EmberStaggerSwagger__SlideAndFadeOutRight;
       animation-duration: var(--anim-duration__slide-element);
       animation-timing-function: var(--easing__ease-out-cubic);
       animation-fill-mode: forwards;

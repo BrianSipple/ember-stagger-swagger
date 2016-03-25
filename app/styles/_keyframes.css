@@ -1,4 +1,4 @@
-@keyframes _EmberStaggerSwagger__SlideAndFadeInFromLeft {
+@keyframes __EmberStaggerSwagger__SlideAndFadeInFromLeft {
   0% {
     opacity: 0;
     transform: translate3d(-100%, 0%, 0%);
@@ -9,7 +9,7 @@
   }
 }
 
-@keyframes _EmberStaggerSwagger__SlideAndFadeOutRight {
+@keyframes __EmberStaggerSwagger__SlideAndFadeOutRight {
   0% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
