@@ -33,12 +33,17 @@ By default, the component treats all direct child elements as its "list items":
 import StaggerListMixin from 'ember-stagger-swagger/mixins/stagger-list';
 ```
 
-### Specifying the stagger type
+### Specifying the stagger direction
 
 
 
-### Overriding Keyframes
+### Specifying Custom Keyframes
 
+
+### Future Goals
+* Removing need for any CSS by using the Web Animations API.
+  * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `stagger-swagger's` zero-dependency design goals.
+  
 
 
 

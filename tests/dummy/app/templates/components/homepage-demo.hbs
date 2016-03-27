@@ -1,0 +1,137 @@
+<div class="u-full-stretch u-full-bleed u-relative u-overflow-hide u-overflow-scroll-y">
+
+  <header class="u-relative u-fill-width u-height-20">
+    <h1 class="u-absolute u-transform-center u-fill-width g-gray--300 u-align-center">
+      Ember Stagger Swagger
+    </h1>
+  </header>
+
+  <main class="u-relative u-fill-width u-fill-height u-mt4">
+
+    <section class="u-width-90 u-fill-height u-relative u-flow-middle">
+
+      <h2 class="u-align-center g-gray--300 u-align-center">
+        Toggle Stagger Options
+      </h2>
+
+      <div class="homepage-demo__swagger-zone
+                  o-flex-grid
+                  o-flex-grid--auto
+                  o-flex-grid--noWrap
+                  u-mt2">
+
+        {{!-- showItemsToggle column --}}
+        <div class="homepage-demo__swagger-zone-toggle-menu
+                    o-grid-cell
+                    o-flex-grid
+                    o-flex-grid--full
+                    o-flex-grid--center
+                    o-flex-grid--spaceAround
+                    u-width-20
+                    u-fill-height
+                    u-mr2
+                    u-relative">
+
+
+          {{!-- show/hide toggle --}}
+          <div class="o-grid-cell">
+
+            <div class="o-flex-grid">
+              <label class="o-grid-cell" for="showItemsRadio">Show</label>
+              {{input class="o-grid-cell" id="showItemsRadio" type="radio" name="showItemsToggleGroup" value=(mut showItems)}}
+            </div>
+
+            <div class="o-flex-grid">
+              <label class="o-grid-cell" for="hideItemsRadio">Hide</label>
+              {{input class="o-grid-cell" id="hideItemsRadio" type="radio" name="showItemsToggleGroup" value=(mut showItems)}}
+            </div>
+
+          </div>
+
+          {{!-- example in/out keyframes to choose --}}
+          <div class="o-grid-cell">
+            <h4>Custom Keyframes Examples</h4>
+
+            <div class="o-flex-grid">
+              <label class="o-grid-cell" for="keyframes--slide">Slide</label>
+              {{input class="o-grid-cell" id="keyframes--slide" type="radio" name="keyframesToggleGroup" value=(mut selectedKeyframe)}}
+            </div>
+
+            <div class="o-flex-grid">
+              <label class="o-grid-cell" for="keyframes--slide-and-fade">SlideAndFade</label>
+              {{input class="o-grid-cell" id="keyframes--slide-and-fade" type="radio" name="keyframesToggleGroup" value=(mut selectedKeyframe)}}
+            </div>
+
+            <div class="o-flex-grid">
+              <label class="o-grid-cell" for="keyframes--fad">Fade</label>
+              {{input class="o-grid-cell" id="keyframes--fad" type="radio" name="keyframesToggleGroup" value=(mut selectedKeyframe)}}
+            </div>
+
+            <div class="o-flex-grid">
+              <label class="o-grid-cell" for="keyframes--scale">Scale</label>
+              {{input class="o-grid-cell" id="keyframes--scale" type="radio" name="keyframesToggleGroup" value=(mut selectedKeyframe)}}
+            </div>
+
+          </div>
+
+        </div>
+
+        {{!-- Content column --}}
+        <div class="homepage-demo__swagger-zone-list-container
+                    o-grid-cell
+                    o-flex-grid
+                    o-flex-grid--full">
+
+          <div class="o-grid-cell
+                      u-mt-auto
+                      u-fill-width
+                      u-overflow-hide
+                      g-bg-red--100">
+
+            {{#stagger-list class="g-list-reset" tagName="ul" staggerDirection="left"}}
+              {{#each staggerListItems as |item index|}}
+                {{space-craft-card tagName="li" class="g-box-shadow-2 g-nearWhite u-m2" item=item index=index}}
+              {{/each}}
+            {{/stagger-list}}
+          </div>
+
+
+          {{!-- Direction menu TODO: Make THIS a stagger list 😀? --}}
+          <nav class="homepage-demo__swagger-zone-menu
+                      o-grid-cell
+                      u-mt2
+                      u-relative">
+
+            <ul class="o-flex-grid
+                       o-flex-grid--fit
+                       u-fill-width
+                       u-height-spacing-4
+                       u-pl2
+                       u-pr2
+                       g-list-reset
+                       g-bg-yellow--300">
+
+              {{#each staggerDirectionOptions as |direction|}}
+                <li class="o-grid-cell">
+
+                  <label class="o-flex-grid o-flex-grid--fill" for={{direction}} onclick={{action "onStaggerDirectionSelected" }}>
+                    <span class="o-grid-cell">{{direction}}</span>
+                    {{input class="o-grid-cell" id=direction type="radio" name="stagger-direction" value=(mut currentStaggerDirection) onChecked=(action 'onStaggerDirectionSelected' direction)}}
+                  </label>
+
+                </li>
+              {{/each}}
+
+            </ul>
+          </nav>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+</div>

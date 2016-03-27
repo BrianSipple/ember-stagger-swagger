@@ -8,7 +8,8 @@
  * element of the component's template block.
  */
 import Ember from 'ember';
-import crossBrowserize from 'ember-stagger-swagger/utils/cross-browserize-style-object';
+//import crossBrowserize from 'ember-stagger-swagger/utils/cross-browserize-style-object';
+import setElementStyleProperty from 'ember-stagger-swagger/utils/set-element-style-property';
 
 const {
   Mixin,
@@ -56,9 +57,15 @@ const ANIMATION_NAME_MAP = {
   },
 };
 
+const ANIMATION_NAME_PREFIXES  = [
+  'webkit',
+  'ms',
+  'moz',
+  'o',
+];
+
 export default Mixin.create({
 
-  tagName: 'ul',
   classNames: ['_ember-stagger-swagger_stagger-list'],
 
   showItems: false,
@@ -73,7 +80,13 @@ export default Mixin.create({
   /**
    * Callback (to be initialized) for our animationend event listener
    */
+  _onStaggerStart: null,
   _onStaggerComplete: null,
+
+  /**
+   * Array of cached "list item" elements to cache upon insertion
+   */
+  _listItemElems: null,
 
 
   _inAnimationName: computed('inAnimationName', 'staggerDirection', function computeInAnimationName () {
@@ -109,8 +122,30 @@ export default Mixin.create({
   didInsertElement () {
     this._super(...arguments);
 
-    this._initStaggerAnimationFunction();
+    this._initStaggerAnimationFunctions();
+    this._cacheListItems();
     run.scheduleOnce('afterRender', this, '_setInitialDisplayState');
+  },
+
+
+  /**
+   * Trigger the staggering animation when something on the outside updates `showItems`
+   */
+  didUpdateAttrs () {
+    this._super(...arguments);
+
+    const showItems = this.get('showItems');
+    const classToAdd = showItems ? CLASS_NAMES.itemsShowing : CLASS_NAMES.itemsCollapsing
+    const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
+
+    run.once(() => {
+      this.element.classList.remove(classToRemove);
+      this.element.classList.add(classToAdd);
+    });
+
+    run.scheduleOnce('afterRender', this, () => {
+      this._setAnimationNameOnItems(this.get('currentAnimationName'));
+    });
   },
 
 
@@ -121,27 +156,17 @@ export default Mixin.create({
     this.element.removeEventListener('webkitAnimationEnd', this._onStaggerComplete);
     this.element.removeEventListener('oAnimationEnd', this._onStaggerComplete);
     this.element.removeEventListener('msAnimationEnd', this._onStaggerComplete);
-  },
 
-  /**
-   * Trigger the staggering animation when something on the outside updates `showItems`
-   */
-  didUpdateAttrs () {
-    this._super(...arguments);
-
-    const showItems = this.get('showItems');
-    const classToAdd = showItems ? CLASS_NAMES.itemsShowing : CLASS_NAMES.itemsCollapsing;
-    const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
-
-    run.once(() => {
-      this._setAnimationName(this.get('currentAnimationName'));
-      this.element.classList.remove(classToRemove);
-      this.element.classList.add(classToAdd);
-    });
+    this._listItemElems = null;
   },
 
 
-  _initStaggerAnimationFunction () {
+
+  _cacheListItems () {
+    this._listItemElems = Array.from(this.element.children);
+  },
+
+  _initStaggerAnimationFunctions () {
 
     /* AnimationEvent listener to handle keeping the list items hidden */
     this._onStaggerComplete = function onStaggerComplete (event) {
@@ -151,11 +176,18 @@ export default Mixin.create({
 
       if (Object.is(event.target, lastListItemElem)) {
         run.once(() => {
+          debugger;
           this.element.classList.toggle(CLASS_NAMES.itemsHidden);
         });
       }
 
     }.bind(this);
+
+    // this._onStaggerStart = function onStaggerStart (event) {
+    //   run.once(() => {
+    //
+    //   });
+    // }
   },
 
 
@@ -163,6 +195,7 @@ export default Mixin.create({
     if (!this.showItems) {
       this.element.classList.add(CLASS_NAMES.itemsHidden);
     }
+
     this._setStaggerProps();
     this.element.addEventListener('animationend', this._onStaggerComplete, false);
     this.element.addEventListener('webkitAnimationEnd', this._onStaggerComplete, false);
@@ -175,10 +208,9 @@ export default Mixin.create({
     const interval = this.get('staggerInterval');
 
     let delay;
-    Array.from(this.element.children).forEach((listItemElem, idx) => {
+    this._listItemElems.forEach((listItemElem, idx) => {
       delay = (idx + 1) * interval;
-      crossBrowserize(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
-      listItemElem.style.animationDelay = `${delay}ms`;
+      setElementStyleProperty(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
     });
   },
 
@@ -194,14 +226,9 @@ export default Mixin.create({
     }
   },
 
-  _setAnimationName(currentAnimationName) {
-
-    ANIMATION_NAME_PREFIXES.forEach((prefix) => {
-      if (this.element.style[`${prefix}AnimationName`]) {
-        this.element.style[`${prefix}AnimationName`] = currentAnimationName;
-      } else {
-        this.element.style.animationName = currentAnimationName;
-      }
+  _setAnimationNameOnItems(currentAnimationName) {
+    this._listItemElems.forEach((listItemElem, idx) => {
+      setElementStyleProperty(listItemElem, 'animationName', currentAnimationName);
     });
   },
 

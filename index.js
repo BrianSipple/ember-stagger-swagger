@@ -2,6 +2,7 @@
 'use strict';
 
 const path = require('path');
+const util = require('util');
 
 const MATCH_CSS = new RegExp('.*\\.css$');
 
@@ -13,7 +14,9 @@ const cssNextOptions = {
 module.exports = {
   name: 'ember-stagger-swagger',
 
-  normalizeEntityName: function () {},
+  isDevelopingAddon () {
+    return true;
+  },
 
   _getCSSFileName: function () {
     return this.name + '.css';
@@ -27,14 +30,15 @@ module.exports = {
   included: function (app) {
     this._super.included(app);
 
+
     if (!this._isAddon()) {
       app.import(path.join('vendor', this._getCSSFileName()));
     }
+
   },
 
 
   treeForVendor: function (node) {
-
     if (this._isAddon()) { return node; }
 
     const Funnel = require('broccoli-funnel');
@@ -43,6 +47,7 @@ module.exports = {
     const sourcemapsOpts = { inline: false };
 
     const stylesPath = path.join(this.project.nodeModulesPath, this.name, 'app', 'styles');
+
     const inputTrees = new Funnel(stylesPath, { include: [MATCH_CSS] });
     const inputFile = this._getCSSFileName();
     const outputFile = inputFile;

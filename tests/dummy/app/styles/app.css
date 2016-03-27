@@ -1,0 +1,25 @@
+.homepage-demo .homepage-demo__swagger-zone {
+  width: 50rem;
+  height: 30rem;
+}
+
+.homepage-demo .homepage-demo__swagger-zone-list-container {
+  width: 35rem;
+}
+
+.space-craft-card {
+  height: 5rem;
+}
+
+.space-craft-card:nth-child(4n+1) .space-craft-card__img {
+  background-color: blue;
+}
+.space-craft-card:nth-child(4n+2) .space-craft-card__img {
+  background-color: yellow;
+}
+.space-craft-card:nth-child(4n+3) .space-craft-card__img {
+  background-color: hotpink;
+}
+.space-craft-card:nth-child(4n+4) .space-craft-card__img {
+  background-color: rebeccapurple;
+}
