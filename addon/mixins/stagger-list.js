@@ -142,7 +142,6 @@ export default Mixin.create({
       this.element.classList.remove(classToRemove);
       this.element.classList.add(classToAdd);
     });
-
     run.scheduleOnce('afterRender', this, () => {
       this._setAnimationNameOnItems(this.get('currentAnimationName'));
     });
@@ -176,7 +175,6 @@ export default Mixin.create({
 
       if (Object.is(event.target, lastListItemElem)) {
         run.once(() => {
-          debugger;
           this.element.classList.toggle(CLASS_NAMES.itemsHidden);
         });
       }
