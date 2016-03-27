@@ -42,18 +42,22 @@ const ANIMATION_NAME_MAP = {
   [STAGGER_DIRECTIONS.LEFT]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
     out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
+    inverseDirection: STAGGER_DIRECTIONS.RIGHT,
   },
   [STAGGER_DIRECTIONS.DOWN]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
     out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
+    inverseDirection: STAGGER_DIRECTIONS.UP,
   },
   [STAGGER_DIRECTIONS.RIGHT]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
     out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
+    inverseDirection: STAGGER_DIRECTIONS.LEFT,
   },
   [STAGGER_DIRECTIONS.UP]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
     out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
+    inverseDirection: STAGGER_DIRECTIONS.DOWN,
   },
 };
 
@@ -73,7 +77,7 @@ export default Mixin.create({
   /* MILLESECONDS */
   staggerInterval: null,
 
-  staggerDirection: null,
+  inDirection: null,
   inAnimationName: null,
   outAnimationName: null,
 
@@ -89,12 +93,13 @@ export default Mixin.create({
   _listItemElems: null,
 
 
-  _inAnimationName: computed('inAnimationName', 'staggerDirection', function computeInAnimationName () {
-    return this.get('inAnimationName') || ANIMATION_NAME_MAP[this.get('staggerDirection')].in;
+  _inAnimationName: computed('inAnimationName', 'inDirection', function computeInAnimationName () {
+    return this.get('inAnimationName') || ANIMATION_NAME_MAP[this.get('inDirection')].in;
   }),
 
-  _outAnimationName: computed ('outAnimationName', 'staggerDirection', function computeOutAnimationName () {
-    return this.get('outAnimationName') || ANIMATION_NAME_MAP[this.get('staggerDirection')].out;
+  _outAnimationName: computed ('outAnimationName', 'outDirection', function computeOutAnimationName () {
+    debugger;
+    return this.get('outAnimationName') || ANIMATION_NAME_MAP[this.get('outDirection')].out;
   }),
 
   currentAnimationName: computed(
@@ -110,12 +115,8 @@ export default Mixin.create({
   init () {
     this._super(...arguments);
 
-    this._initStaggerInterval();
-
-    assert(
-      'stagger-list must have a valid `staggerDirection`',
-      !!this.staggerDirection && !!ANIMATION_NAME_MAP[this.staggerDirection]
-    );
+    this._resolveInitialStaggerInterval();
+    this._resolveInitialStaggerDirections();
   },
 
 
@@ -124,7 +125,7 @@ export default Mixin.create({
 
     this._initStaggerAnimationFunctions();
     this._cacheListItems();
-    run.scheduleOnce('afterRender', this, '_setInitialDisplayState');
+    run.scheduleOnce('afterRender', this, '_prepareItemsInDOM');
   },
 
 
@@ -189,12 +190,12 @@ export default Mixin.create({
   },
 
 
-  _setInitialDisplayState () {
+  _prepareItemsInDOM () {
     if (!this.showItems) {
       this.element.classList.add(CLASS_NAMES.itemsHidden);
     }
 
-    this._setStaggerProps();
+    this._computeAnimationDelays();
     this.element.addEventListener('animationend', this._onStaggerComplete, false);
     this.element.addEventListener('webkitAnimationEnd', this._onStaggerComplete, false);
     this.element.addEventListener('oAnimationEnd', this._onStaggerComplete, false);
@@ -202,17 +203,7 @@ export default Mixin.create({
   },
 
 
-  _setStaggerProps () {
-    const interval = this.get('staggerInterval');
-
-    let delay;
-    this._listItemElems.forEach((listItemElem, idx) => {
-      delay = (idx + 1) * interval;
-      setElementStyleProperty(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
-    });
-  },
-
-  _initStaggerInterval () {
+  _resolveInitialStaggerInterval () {
     if (!this.staggerInterval) {
       this.staggerInterval = DEFAULT_STAGGER_INTERVAL;
 
@@ -222,6 +213,37 @@ export default Mixin.create({
         !Number.isNaN(Number(this.staggerInterval)) && this.staggerInterval > 0
       );
     }
+  },
+
+  _resolveInitialStaggerDirections () {
+    debugger;
+    // enforce inDirection
+    assert(
+      'stagger-list must have a valid `inDirection`',
+      !!this.inDirection && !!ANIMATION_NAME_MAP[this.inDirection]
+    );
+
+    // if not set, set the default outDirection to the reverse of the inDirection
+    if (!this.outDirection) {
+      this.outDirection = ANIMATION_NAME_MAP[this.inDirection].inverseDirection;
+
+    } else if (!ANIMATION_NAME_MAP[this.outDirection]) {
+      warn(`invalid \`outDirection\`. Defaulting to the continuation of \`inDirection\`
+        https://https://github.com/BrianSipple/ember-stagger-swagger#usage`
+      );
+      this.outDirection = this.inDirection;
+    }
+  },
+
+
+  _computeAnimationDelays () {
+    const interval = this.get('staggerInterval');
+
+    let delay;
+    this._listItemElems.forEach((listItemElem, idx) => {
+      delay = (idx + 1) * interval;
+      setElementStyleProperty(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
+    });
   },
 
   _setAnimationNameOnItems(currentAnimationName) {
