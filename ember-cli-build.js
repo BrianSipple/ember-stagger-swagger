@@ -35,7 +35,7 @@ const postcssOptions = {
   ]
 };
 
-const STYLES_FILE_NAME = 'stagger-swagger.css';
+const STYLES_FILE_NAME = 'ember-stagger-swagger.css';
 const MATCH_CSS = new RegExp('.*\\.css$');
 
 module.exports = function(defaults) {

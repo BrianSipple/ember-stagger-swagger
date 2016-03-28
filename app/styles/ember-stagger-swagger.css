@@ -1,5 +1,4 @@
 @import './_keyframes.css';
-@import './_easings.css';
 @import './_durations.css';
 
 ._ember-stagger-swagger_stagger-list {
@@ -9,7 +8,7 @@
   &.items-hidden {
     > * {
       visibility: hidden;
-      transform: translate3d(-100%, 0, 0);
+      opacity: 0;
     }
   }
 
@@ -17,7 +16,6 @@
     > * {
       visibility: visible;
       animation-duration: var(--anim-duration__slide-element);
-      animation-timing-function: var(--easing__ease-out-cubic);
       animation-fill-mode: forwards;
     }
   }
@@ -25,7 +23,6 @@
   &.items-collapsing {
     > * {
       animation-duration: var(--anim-duration__slide-element);
-      animation-timing-function: var(--easing__ease-out-cubic);
       animation-fill-mode: forwards;
     }
   }

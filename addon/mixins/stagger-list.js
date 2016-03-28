@@ -18,12 +18,20 @@ const {
   assert,
 } = Ember;
 
-/**
- * 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered
- * but still-perceptively fluid motion.
- * (see: https://en.wikipedia.org/wiki/Traditional_animation#.22Shooting_on_twos.22)
- */
-const DEFAULT_STAGGER_INTERVAL = 32; // ms
+
+const defaults = {
+
+  /**
+   * 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered
+   * but still-perceptively fluid motion.
+   * (see: https://en.wikipedia.org/wiki/Traditional_animation#.22Shooting_on_twos.22)
+   */
+  STAGGER_INTERVAL: 32,
+
+  IN_TIMING_FUNCTION: 'cubic-bezier(0.215, 0.610, 0.355, 1.000);',  // ease-out-cubic
+  OUT_TIMING_FUNCTION: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
+};
+
 
 const CLASS_NAMES = {
   itemsHidden: 'items-hidden',
@@ -31,7 +39,7 @@ const CLASS_NAMES = {
   itemsCollapsing: 'items-collapsing',
 };
 
-const STAGGER_DIRECTIONS = {
+const ANIMATION_DIRECTIONS = {
   LEFT: 'left',
   DOWN: 'down',
   RIGHT: 'right',
@@ -39,25 +47,25 @@ const STAGGER_DIRECTIONS = {
 };
 
 const ANIMATION_NAME_MAP = {
-  [STAGGER_DIRECTIONS.LEFT]: {
+  [ANIMATION_DIRECTIONS.LEFT]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
-    inverseDirection: STAGGER_DIRECTIONS.RIGHT,
-  },
-  [STAGGER_DIRECTIONS.DOWN]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
-    inverseDirection: STAGGER_DIRECTIONS.UP,
-  },
-  [STAGGER_DIRECTIONS.RIGHT]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
     out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
-    inverseDirection: STAGGER_DIRECTIONS.LEFT,
+    inverseDirection: ANIMATION_DIRECTIONS.RIGHT,
   },
-  [STAGGER_DIRECTIONS.UP]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
+  [ANIMATION_DIRECTIONS.DOWN]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
     out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
-    inverseDirection: STAGGER_DIRECTIONS.DOWN,
+    inverseDirection: ANIMATION_DIRECTIONS.UP,
+  },
+  [ANIMATION_DIRECTIONS.RIGHT]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
+    out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
+    inverseDirection: ANIMATION_DIRECTIONS.LEFT,
+  },
+  [ANIMATION_DIRECTIONS.UP]: {
+    in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
+    out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
+    inverseDirection: ANIMATION_DIRECTIONS.DOWN,
   },
 };
 
@@ -72,7 +80,14 @@ export default Mixin.create({
 
   classNames: ['_ember-stagger-swagger_stagger-list'],
 
+
+  /* ----------------------- API ------------------------ */
+
+  /* Flag for triggering either the show or hide animation */
   showItems: false,
+
+  /* trigger the entrance animation when this element is inserted into the DOM */
+  enterOnRender: false,
 
   /* MILLESECONDS */
   staggerInterval: null,
@@ -81,6 +96,21 @@ export default Mixin.create({
   outDirection: null,
   inAnimationName: null,
   outAnimationName: null,
+
+  inTimingFunc: null,
+  outTimingFunc: null,
+  // enable configuration of a single timing function for both in and out animation
+  timingFunc: null,
+
+  inDuration: 0.5,    // seconds
+  outDuration: 0.5,   // seconds
+  // enable configuration of a single duration for both in and out animation
+  duration: 0.5,
+
+  /* ----------------------- /API ------------------------ */
+
+
+  isAnimating: false,
 
   /**
    * Callback (to be initialized) for our animationend event listener
@@ -98,7 +128,7 @@ export default Mixin.create({
     return this.get('inAnimationName') || ANIMATION_NAME_MAP[this.get('inDirection')].in;
   }),
 
-  _outAnimationName: computed ('outAnimationName', 'outDirection', function computeOutAnimationName () {
+  _outAnimationName: computed('outAnimationName', 'outDirection', function computeOutAnimationName () {
     return this.get('outAnimationName') || ANIMATION_NAME_MAP[this.get('outDirection')].out;
   }),
 
@@ -112,18 +142,20 @@ export default Mixin.create({
   ),
 
 
+
   init () {
     this._super(...arguments);
 
     this._resolveInitialStaggerInterval();
     this._resolveInitialStaggerDirections();
+    this._resolveInitialTimingFunctions();
   },
 
 
   didInsertElement () {
     this._super(...arguments);
 
-    this._initStaggerAnimationFunctions();
+    this._initAnimationCallbacks();
     this._cacheListItems();
     run.scheduleOnce('afterRender', this, '_prepareItemsInDOM');
   },
@@ -142,16 +174,14 @@ export default Mixin.create({
       const classToAdd = showItems ? CLASS_NAMES.itemsShowing : CLASS_NAMES.itemsCollapsing
       const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
 
-      run.once(() => {  
+      run.once(() => {
         this.element.classList.remove(classToRemove);
         this.element.classList.add(classToAdd);
       });
       run.scheduleOnce('afterRender', this, () => {
-        this._setAnimationNameOnItems(this.get('currentAnimationName'));
+        this._triggerAnimation(this.get('currentAnimationName'));
       });
     }
-
-
   },
 
 
@@ -172,7 +202,7 @@ export default Mixin.create({
     this._listItemElems = Array.from(this.element.children);
   },
 
-  _initStaggerAnimationFunctions () {
+  _initAnimationCallbacks () {
 
     /* AnimationEvent listener to handle keeping the list items hidden */
     this._onStaggerComplete = function onStaggerComplete (event) {
@@ -182,17 +212,12 @@ export default Mixin.create({
 
       if (Object.is(event.target, lastListItemElem)) {
         run.once(() => {
+          this.set('isAnimating', false);
           this.element.classList.toggle(CLASS_NAMES.itemsHidden);
         });
       }
 
     }.bind(this);
-
-    // this._onStaggerStart = function onStaggerStart (event) {
-    //   run.once(() => {
-    //
-    //   });
-    // }
   },
 
 
@@ -201,7 +226,7 @@ export default Mixin.create({
       this.element.classList.add(CLASS_NAMES.itemsHidden);
     }
 
-    this._computeAnimationDelays();
+    this._setAnimationValuesOnItems();
     this.element.addEventListener('animationend', this._onStaggerComplete, false);
     this.element.addEventListener('webkitAnimationEnd', this._onStaggerComplete, false);
     this.element.addEventListener('oAnimationEnd', this._onStaggerComplete, false);
@@ -211,7 +236,7 @@ export default Mixin.create({
 
   _resolveInitialStaggerInterval () {
     if (!this.staggerInterval) {
-      this.staggerInterval = DEFAULT_STAGGER_INTERVAL;
+      this.staggerInterval = defaults.STAGGER_INTERVAL;
 
     } else {
       assert(
@@ -228,9 +253,9 @@ export default Mixin.create({
       !!this.inDirection && !!ANIMATION_NAME_MAP[this.inDirection]
     );
 
-    // if not set, set the default outDirection to the reverse of the inDirection
+    // if not set, set the default outDirection to the continuation of the inDirection
     if (!this.outDirection) {
-      this.outDirection = ANIMATION_NAME_MAP[this.inDirection].inverseDirection;
+      this.outDirection = this.inDirection;
 
     } else if (!ANIMATION_NAME_MAP[this.outDirection]) {
       warn(`invalid \`outDirection\`. Defaulting to the continuation of \`inDirection\`
@@ -240,18 +265,27 @@ export default Mixin.create({
     }
   },
 
+  _resolveInitialTimingFunctions () {
+    this.inTimingFunc = this.inTimingFunc || defaults.IN_TIMING_FUNCTION;
+    this.outTimingFunc = this.outTimingFunc || defaults.OUT_TIMING_FUNCTION;
+  },
 
-  _computeAnimationDelays () {
+
+  _setAnimationValuesOnItems () {
     const interval = this.get('staggerInterval');
+    const easingFunction = this.get('inTimingFunc');
 
     let delay;
     this._listItemElems.forEach((listItemElem, idx) => {
       delay = (idx + 1) * interval;
       setElementStyleProperty(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
+      setElementStyleProperty(listItemElem, 'animationTimingFunction', easingFunction);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
     });
   },
 
-  _setAnimationNameOnItems(currentAnimationName) {
+
+  _triggerAnimation(currentAnimationName) {
+    this.set('isAnimating', true);
     this._listItemElems.forEach((listItemElem, idx) => {
       setElementStyleProperty(listItemElem, 'animationName', currentAnimationName);
     });
