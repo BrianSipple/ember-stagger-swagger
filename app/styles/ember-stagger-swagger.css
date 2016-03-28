@@ -15,14 +15,14 @@
   &.items-showing {
     > * {
       visibility: visible;
-      animation-duration: var(--anim-duration__slide-element);
+      /*animation-duration: var(--anim-duration__slide-element);*/
       animation-fill-mode: forwards;
     }
   }
 
   &.items-collapsing {
     > * {
-      animation-duration: var(--anim-duration__slide-element);
+      /*animation-duration: var(--anim-duration__slide-element);*/
       animation-fill-mode: forwards;
     }
   }

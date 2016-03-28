@@ -46,27 +46,54 @@ const ANIMATION_DIRECTIONS = {
   UP: 'up',
 };
 
-const ANIMATION_NAME_MAP = {
+const ANIMATION_NAMES = {
+  SLIDE_AND_FADE: 'slideAndFade',
+  SLIDE: 'slide',
+  FADE: 'fade',
+  //SCALE: 'scale', // TODO: Scale from left, right, up, down, and up
+};
+
+const KEYFRAMES_MAP = {
   [ANIMATION_DIRECTIONS.LEFT]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
-    inverseDirection: ANIMATION_DIRECTIONS.RIGHT,
+    in: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
+    },
+    out: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
+    },
   },
   [ANIMATION_DIRECTIONS.DOWN]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
     out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
-    inverseDirection: ANIMATION_DIRECTIONS.UP,
   },
   [ANIMATION_DIRECTIONS.RIGHT]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
     out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
-    inverseDirection: ANIMATION_DIRECTIONS.LEFT,
   },
   [ANIMATION_DIRECTIONS.UP]: {
     in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
     out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
-    inverseDirection: ANIMATION_DIRECTIONS.DOWN,
   },
+  // [ANIMATION_DIRECTIONS.LEFT]: {
+  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
+  //   out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
+  //   inverseDirection: ANIMATION_DIRECTIONS.RIGHT,
+  // },
+  // [ANIMATION_DIRECTIONS.DOWN]: {
+  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
+  //   out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
+  //   inverseDirection: ANIMATION_DIRECTIONS.UP,
+  // },
+  // [ANIMATION_DIRECTIONS.RIGHT]: {
+  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
+  //   out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
+  //   inverseDirection: ANIMATION_DIRECTIONS.LEFT,
+  // },
+  // [ANIMATION_DIRECTIONS.UP]: {
+  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
+  //   out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
+  //   inverseDirection: ANIMATION_DIRECTIONS.DOWN,
+  // },
 };
 
 const ANIMATION_NAME_PREFIXES  = [
@@ -97,15 +124,15 @@ export default Mixin.create({
   inAnimationName: null,
   outAnimationName: null,
 
+  /* Timing Function */
   inTimingFunc: null,
   outTimingFunc: null,
-  // enable configuration of a single timing function for both in and out animation
-  timingFunc: null,
+  timingFunc: null, // single timing function for both in and out
 
-  inDuration: 0.5,    // seconds
-  outDuration: 0.5,   // seconds
-  // enable configuration of a single duration for both in and out animation
-  duration: 0.5,
+  /* Duration (seconds) */
+  inDuration: 0.5,
+  outDuration: 0.5,
+  duration: 0.5,  // single duration for both in and out
 
   /* ----------------------- /API ------------------------ */
 
@@ -125,11 +152,11 @@ export default Mixin.create({
 
 
   _inAnimationName: computed('inAnimationName', 'inDirection', function computeInAnimationName () {
-    return this.get('inAnimationName') || ANIMATION_NAME_MAP[this.get('inDirection')].in;
+    return this.get('inAnimationName') || KEYFRAMES_MAP[this.get('inDirection')].in;
   }),
 
   _outAnimationName: computed('outAnimationName', 'outDirection', function computeOutAnimationName () {
-    return this.get('outAnimationName') || ANIMATION_NAME_MAP[this.get('outDirection')].out;
+    return this.get('outAnimationName') || KEYFRAMES_MAP[this.get('outDirection')].out;
   }),
 
   currentAnimationName: computed(
@@ -141,6 +168,25 @@ export default Mixin.create({
     }
   ),
 
+  currentAnimationDuration: computed('inDuration', 'outDuration', 'duration', 'showItems', function computeCurrentAnimationDuration () {
+    // give priority to a specified in/out duration
+    if (this.get('duration')) {
+      return this.get('duration');
+    }
+
+    // otherwise, set according to the state of showItems
+    return this.get('showItems') ? this.get('inDuration') : this.get('outDuration');
+  }),
+
+  currentAnimationTimingFunction: computed('inTimingFunc', 'outTimingFunc', 'timingFunc', 'showItems', function computeCurrentTimingFunction () {
+    // give priority to a specified in/out duration
+    if (this.get('timingFunc')) {
+      return this.get('timingFunc');
+    }
+
+    // otherwise, set according to the state of showItems
+    return this.get('showItems') ? this.get('inTimingFunc') : this.get('outTimingFunc');
+  }),
 
 
   init () {
@@ -179,7 +225,7 @@ export default Mixin.create({
         this.element.classList.add(classToAdd);
       });
       run.scheduleOnce('afterRender', this, () => {
-        this._triggerAnimation(this.get('currentAnimationName'));
+        this._triggerAnimation();
       });
     }
   },
@@ -226,7 +272,7 @@ export default Mixin.create({
       this.element.classList.add(CLASS_NAMES.itemsHidden);
     }
 
-    this._setAnimationValuesOnItems();
+    this._setInitialAnimationValuesForItems();
     this.element.addEventListener('animationend', this._onStaggerComplete, false);
     this.element.addEventListener('webkitAnimationEnd', this._onStaggerComplete, false);
     this.element.addEventListener('oAnimationEnd', this._onStaggerComplete, false);
@@ -250,14 +296,14 @@ export default Mixin.create({
     // enforce inDirection
     assert(
       'stagger-list must have a valid `inDirection`',
-      !!this.inDirection && !!ANIMATION_NAME_MAP[this.inDirection]
+      !!this.inDirection && !!KEYFRAMES_MAP[this.inDirection]
     );
 
     // if not set, set the default outDirection to the continuation of the inDirection
     if (!this.outDirection) {
       this.outDirection = this.inDirection;
 
-    } else if (!ANIMATION_NAME_MAP[this.outDirection]) {
+    } else if (!KEYFRAMES_MAP[this.outDirection]) {
       warn(`invalid \`outDirection\`. Defaulting to the continuation of \`inDirection\`
         https://https://github.com/BrianSipple/ember-stagger-swagger#usage`
       );
@@ -271,22 +317,39 @@ export default Mixin.create({
   },
 
 
-  _setAnimationValuesOnItems () {
-    const interval = this.get('staggerInterval');
-    const easingFunction = this.get('inTimingFunc');
+  _setInitialAnimationValuesForItems () {
+    const animationDelay = this.get('staggerInterval');
+    const easingFunction = this.get('currentAnimationTimingFunction');
+    const animationDuration = `${this.get('currentAnimationDuration')}ms`;
 
-    let delay;
     this._listItemElems.forEach((listItemElem, idx) => {
-      delay = (idx + 1) * interval;
-      setElementStyleProperty(listItemElem, 'animationDelay', `${delay}ms`);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
-      setElementStyleProperty(listItemElem, 'animationTimingFunction', easingFunction);  // TODO: Something more efficient than a full-prefix-list sledgehammer?
+      setElementStyleProperty(listItemElem, 'animationDelay', `${animationDelay * (idx + 1)}ms`);
+      setElementStyleProperty(listItemElem, 'animationTimingFunction', easingFunction);
+      setElementStyleProperty(listItemElem, 'animationDuration', animationDuration);
     });
   },
 
+  // _updateStylePropertyForItems (propName, value, addIndexMultiple = false) {
+  //   if (addIndexMultiple) {
+  //     this._listItemElems.forEach((item, idx) => {
+  //       setElementStyleProperty(item, propName, value + (value * idx));
+  //     });
+  //   } else {
+  //     this._listItemElems.forEach(item => { setElementStyleProperty(item, propName, value); });
+  //   }
+  // },
 
-  _triggerAnimation(currentAnimationName) {
+  _triggerAnimation() {
+    const currentAnimationName = this.get('currentAnimationName');
+    const currentAnimationDelay = this.get('staggerInterval');
+    const currentAnimationDuration = `${this.get('currentAnimationDuration')}ms`;
+    const currentAnimationTimingFunction = this.get('currentAnimationTimingFunction');
+
     this.set('isAnimating', true);
     this._listItemElems.forEach((listItemElem, idx) => {
+      setElementStyleProperty(listItemElem, 'animationDelay', `${currentAnimationDelay * (idx + 1)}ms`);
+      setElementStyleProperty(listItemElem, 'animationTimingFunction', currentAnimationTimingFunction);
+      setElementStyleProperty(listItemElem, 'animationDuration', currentAnimationDuration);
       setElementStyleProperty(listItemElem, 'animationName', currentAnimationName);
     });
   },
