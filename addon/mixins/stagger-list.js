@@ -78,6 +78,7 @@ export default Mixin.create({
   staggerInterval: null,
 
   inDirection: null,
+  outDirection: null,
   inAnimationName: null,
   outAnimationName: null,
 
@@ -98,7 +99,6 @@ export default Mixin.create({
   }),
 
   _outAnimationName: computed ('outAnimationName', 'outDirection', function computeOutAnimationName () {
-    debugger;
     return this.get('outAnimationName') || ANIMATION_NAME_MAP[this.get('outDirection')].out;
   }),
 
@@ -132,20 +132,26 @@ export default Mixin.create({
   /**
    * Trigger the staggering animation when something on the outside updates `showItems`
    */
-  didUpdateAttrs () {
+  didUpdateAttrs (attrData) {
     this._super(...arguments);
 
-    const showItems = this.get('showItems');
-    const classToAdd = showItems ? CLASS_NAMES.itemsShowing : CLASS_NAMES.itemsCollapsing
-    const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
+    const showItems = attrData.newAttrs.showItems.value;
 
-    run.once(() => {
-      this.element.classList.remove(classToRemove);
-      this.element.classList.add(classToAdd);
-    });
-    run.scheduleOnce('afterRender', this, () => {
-      this._setAnimationNameOnItems(this.get('currentAnimationName'));
-    });
+    // animate when showItems has changed
+    if (showItems !== attrData.oldAttrs.showItems.value) {
+      const classToAdd = showItems ? CLASS_NAMES.itemsShowing : CLASS_NAMES.itemsCollapsing
+      const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
+
+      run.once(() => {  
+        this.element.classList.remove(classToRemove);
+        this.element.classList.add(classToAdd);
+      });
+      run.scheduleOnce('afterRender', this, () => {
+        this._setAnimationNameOnItems(this.get('currentAnimationName'));
+      });
+    }
+
+
   },
 
 
@@ -216,7 +222,6 @@ export default Mixin.create({
   },
 
   _resolveInitialStaggerDirections () {
-    debugger;
     // enforce inDirection
     assert(
       'stagger-list must have a valid `inDirection`',
