@@ -28,7 +28,7 @@ const defaults = {
    */
   STAGGER_INTERVAL: 32,
 
-  IN_TIMING_FUNCTION: 'cubic-bezier(0.215, 0.610, 0.355, 1.000);',  // ease-out-cubic
+  IN_TIMING_FUNCTION: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',  // ease-out-cubic
   OUT_TIMING_FUNCTION: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
 };
 
