@@ -8,7 +8,6 @@
  * element of the component's template block.
  */
 import Ember from 'ember';
-//import crossBrowserize from 'ember-stagger-swagger/utils/cross-browserize-style-object';
 import setElementStyleProperty from 'ember-stagger-swagger/utils/set-element-style-property';
 
 const {
@@ -50,29 +49,65 @@ const ANIMATION_NAMES = {
   SLIDE_AND_FADE: 'slideAndFade',
   SLIDE: 'slide',
   FADE: 'fade',
-  //SCALE: 'scale', // TODO: Scale from left, right, up, down, and up
+  SCALE: 'scale',
 };
 
 const KEYFRAMES_MAP = {
   [ANIMATION_DIRECTIONS.LEFT]: {
     in: {
       [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromRight',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
     },
     out: {
       [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutLeft',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
     },
   },
   [ANIMATION_DIRECTIONS.DOWN]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
+    in: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromTop',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
+    },
+    out: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutDown',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutDown',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
+    },
   },
   [ANIMATION_DIRECTIONS.RIGHT]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
+    in: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromLeft',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
+    },
+    out: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutRight',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutRight',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
+    },
   },
   [ANIMATION_DIRECTIONS.UP]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
+    in: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromBottom',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
+    },
+    out: {
+      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutUp',
+      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutUp',
+      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
+      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
+    },
   },
   // [ANIMATION_DIRECTIONS.LEFT]: {
   //   in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
@@ -121,8 +156,12 @@ export default Mixin.create({
 
   inDirection: null,
   outDirection: null,
-  inAnimationName: null,
-  outAnimationName: null,
+
+  inEffect: null,
+  outEffect: null,
+  customInEffect: null,
+  customOutEffect: null,
+
 
   /* Timing Function */
   inTimingFunc: null,
@@ -151,12 +190,12 @@ export default Mixin.create({
   _listItemElems: null,
 
 
-  _inAnimationName: computed('inAnimationName', 'inDirection', function computeInAnimationName () {
-    return this.get('inAnimationName') || KEYFRAMES_MAP[this.get('inDirection')].in;
+  _inAnimationName: computed('inEffect', 'customInEffect', 'inDirection', function computeInAnimationName () {
+    return this.get('customInEffect') || KEYFRAMES_MAP[this.get('inDirection')].in[this.get('inEffect')];
   }),
 
-  _outAnimationName: computed('outAnimationName', 'outDirection', function computeOutAnimationName () {
-    return this.get('outAnimationName') || KEYFRAMES_MAP[this.get('outDirection')].out;
+  _outAnimationName: computed('outEffect', 'customOutEffect', 'outDirection', function computeOutAnimationName () {
+    return this.get('customOutEffect') || KEYFRAMES_MAP[this.get('outDirection')].out[this.get('outEffect')];
   }),
 
   currentAnimationName: computed(
