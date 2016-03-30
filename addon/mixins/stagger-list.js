@@ -27,6 +27,8 @@ const defaults = {
    */
   STAGGER_INTERVAL: 32,
 
+  INITIAL_DELAY: 0,
+
   IN_TIMING_FUNCTION: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',  // ease-out-cubic
   OUT_TIMING_FUNCTION: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
 };
@@ -140,19 +142,27 @@ const ANIMATION_NAME_PREFIXES  = [
 
 export default Mixin.create({
 
-  classNames: ['_ember-stagger-swagger_stagger-list'],
+  classNames: ['_ember-stagger-swagger_stagger-list', CLASS_NAMES.itemsHidden],
 
 
   /* ----------------------- API ------------------------ */
 
-  /* Flag for triggering either the show or hide animation */
-  showItems: false,
+  /**
+   * Flag for manually triggering either the show or hide animation
+   *
+   * By default, the list items will animate in on render, but
+   * but this allows the user to have full toggle control if they want it.
+   */
+  showItems: true,
 
   /* trigger the entrance animation when this element is inserted into the DOM */
   enterOnRender: false,
 
   /* MILLESECONDS */
   staggerInterval: null,
+
+  /* MILLESECONDS */
+  initialDelay: null,
 
   inDirection: null,
   outDirection: null,
@@ -181,8 +191,16 @@ export default Mixin.create({
   /**
    * Callback (to be initialized) for our animationend event listener
    */
-  _onStaggerStart: null,
   _onStaggerComplete: null,
+
+
+  /**
+   * Callback (to be initialized) for caching the DOM nodes of our child elements
+   * when they get added to the DOM
+   */
+  _onChildElementsInserted: null,
+
+  _childInsertionListener: null,
 
   /**
    * Array of cached "list item" elements to cache upon insertion
@@ -231,7 +249,7 @@ export default Mixin.create({
   init () {
     this._super(...arguments);
 
-    this._resolveInitialStaggerInterval();
+    this._resolveInitialTimingAttrs();
     this._resolveInitialStaggerDirections();
     this._resolveInitialTimingFunctions();
   },
@@ -241,8 +259,14 @@ export default Mixin.create({
     this._super(...arguments);
 
     this._initAnimationCallbacks();
+    this._initChildInsertionCallback();
+    this._initChildInsertionListener();
     this._cacheListItems();
-    run.scheduleOnce('afterRender', this, '_prepareItemsInDOM');
+
+    if (this.get('showItems')) {
+      run.scheduleOnce('afterRender', this, '_triggerAnimation');
+    }
+
   },
 
 
@@ -279,6 +303,7 @@ export default Mixin.create({
     this.element.removeEventListener('msAnimationEnd', this._onStaggerComplete);
 
     this._listItemElems = null;
+    this._childInsertionListener.disconnect();
   },
 
 
@@ -305,11 +330,27 @@ export default Mixin.create({
     }.bind(this);
   },
 
+  _initChildInsertionCallback () {
+    this._onChildElementsInserted = function onChildElementsInserted (event) {
+      run.scheduleOnce('afterRender', this, () => {
+        this._cacheListItems();
+        this._prepareItemsInDOM();
+      });
+    }
+  },
+
+  _initChildInsertionListener () {
+    this._childInsertionListener = new MutationObserver(function childInsertionListener (mutations) {
+      this._onChildElementsInserted();
+    }.bind(this));
+
+    this._childInsertionListener.observe(this.element, { childList: true });
+  },
 
   _prepareItemsInDOM () {
-    if (!this.showItems) {
-      this.element.classList.add(CLASS_NAMES.itemsHidden);
-    }
+    // if (!this.showItems) {
+    //   this.element.classList.add(CLASS_NAMES.itemsHidden);
+    // }
 
     this._setInitialAnimationValuesForItems();
     this.element.addEventListener('animationend', this._onStaggerComplete, false);
@@ -319,15 +360,31 @@ export default Mixin.create({
   },
 
 
-  _resolveInitialStaggerInterval () {
+  _resolveInitialTimingAttrs () {
     if (!this.staggerInterval) {
       this.staggerInterval = defaults.STAGGER_INTERVAL;
 
     } else {
-      assert(
-        'stagger interval must be a numeric value greater than 0',
+
+      /* eslint-disable max-len */
+      warn(
+        `The stagger interval that you attempted to specify was invalid. Please use a numeric value greater than 0. Defaulting to ${defaults.STAGGER_INTERVAL}`,
         !Number.isNaN(Number(this.staggerInterval)) && this.staggerInterval > 0
       );
+      /* eslint-enable max-len */
+    }
+
+    if (!this.initialDelay) {
+      this.initialDelay = defaults.INITIAL_DELAY;
+
+    } else {
+
+      /* eslint-disable max-len */
+      warn(
+        `The initial delay that you attempted to specify was invalid. Please use a numeric value. Defaulting to ${defaults.INITIAL_DELAY}`,
+        !Number.isNaN(Number(this.staggerInterval))
+      );
+      /* eslint-enable max-len */
     }
   },
 
@@ -357,36 +414,28 @@ export default Mixin.create({
 
 
   _setInitialAnimationValuesForItems () {
-    const animationDelay = this.get('staggerInterval');
+    const initialDelay = this.get('initialDelay');
+    const staggerInterval = this.get('staggerInterval');
     const easingFunction = this.get('currentAnimationTimingFunction');
     const animationDuration = `${this.get('currentAnimationDuration')}ms`;
 
     this._listItemElems.forEach((listItemElem, idx) => {
-      setElementStyleProperty(listItemElem, 'animationDelay', `${animationDelay * (idx + 1)}ms`);
+      setElementStyleProperty(listItemElem, 'animationDelay', `${initialDelay + (staggerInterval * (idx + 1))}ms`);
       setElementStyleProperty(listItemElem, 'animationTimingFunction', easingFunction);
       setElementStyleProperty(listItemElem, 'animationDuration', animationDuration);
     });
   },
 
-  // _updateStylePropertyForItems (propName, value, addIndexMultiple = false) {
-  //   if (addIndexMultiple) {
-  //     this._listItemElems.forEach((item, idx) => {
-  //       setElementStyleProperty(item, propName, value + (value * idx));
-  //     });
-  //   } else {
-  //     this._listItemElems.forEach(item => { setElementStyleProperty(item, propName, value); });
-  //   }
-  // },
-
   _triggerAnimation() {
     const currentAnimationName = this.get('currentAnimationName');
-    const currentAnimationDelay = this.get('staggerInterval');
+    const currentStaggerInterval = this.get('staggerInterval');
     const currentAnimationDuration = `${this.get('currentAnimationDuration')}ms`;
     const currentAnimationTimingFunction = this.get('currentAnimationTimingFunction');
 
     this.set('isAnimating', true);
+    this.element.classList.remove(CLASS_NAMES.itemsHidden);
     this._listItemElems.forEach((listItemElem, idx) => {
-      setElementStyleProperty(listItemElem, 'animationDelay', `${currentAnimationDelay * (idx + 1)}ms`);
+      setElementStyleProperty(listItemElem, 'animationDelay', `${currentStaggerInterval * (idx + 1)}ms`);
       setElementStyleProperty(listItemElem, 'animationTimingFunction', currentAnimationTimingFunction);
       setElementStyleProperty(listItemElem, 'animationDuration', currentAnimationDuration);
       setElementStyleProperty(listItemElem, 'animationName', currentAnimationName);

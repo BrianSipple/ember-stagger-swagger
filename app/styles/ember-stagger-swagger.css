@@ -4,6 +4,7 @@
 ._ember-stagger-swagger_stagger-list {
 
   /* TODO: JS all the things? */
+  background-color: hsla(89,100%,50%,1);
 
   &.items-hidden {
     > * {
