@@ -14,8 +14,14 @@ const {
   Mixin,
   computed,
   run,
+  warn,
   assert,
 } = Ember;
+
+const {
+  notEmpty,
+  bool,
+} = computed;
 
 
 const defaults = {
@@ -28,6 +34,8 @@ const defaults = {
   STAGGER_INTERVAL: 32,
 
   INITIAL_DELAY: 0,
+
+  TOTAL_DURATION_MS: 500,
 
   IN_TIMING_FUNCTION: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',  // ease-out-cubic
   OUT_TIMING_FUNCTION: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
@@ -185,7 +193,6 @@ export default Mixin.create({
 
   /* ----------------------- /API ------------------------ */
 
-
   isAnimating: false,
 
   /**
@@ -207,6 +214,11 @@ export default Mixin.create({
    */
   _listItemElems: null,
 
+  hasItemsToAnimate: notEmpty('_listItemElems'),
+  isReadyToAnimate: computed('hasItemsToAnimate', 'isAnimating', function isReadyToAnimate () {
+    debugger;
+    return this.get('hasItemsToAnimate') && !this.get('isAnimating');
+  }),
 
   _inAnimationName: computed('inEffect', 'customInEffect', 'inDirection', function computeInAnimationName () {
     return this.get('customInEffect') || KEYFRAMES_MAP[this.get('inDirection')].in[this.get('inEffect')];
@@ -225,14 +237,17 @@ export default Mixin.create({
     }
   ),
 
-  currentAnimationDuration: computed('inDuration', 'outDuration', 'duration', 'showItems', function computeCurrentAnimationDuration () {
+  currentAnimationDuration: computed('duration', 'inDuration', 'outDuration', 'showItems', function computeDuration () {
     // give priority to a specified in/out duration
     if (this.get('duration')) {
       return this.get('duration');
     }
 
     // otherwise, set according to the state of showItems
-    return this.get('showItems') ? this.get('inDuration') : this.get('outDuration');
+    return this.get('showItems') ?
+      this.get('inDuration') || defaults.TOTAL_DURATION_MS
+      :
+      this.get('outDuration') || defaults.TOTAL_DURATION_MS;
   }),
 
   currentAnimationTimingFunction: computed('inTimingFunc', 'outTimingFunc', 'timingFunc', 'showItems', function computeCurrentTimingFunction () {
@@ -259,14 +274,19 @@ export default Mixin.create({
     this._super(...arguments);
 
     this._initAnimationCallbacks();
-    this._initChildInsertionCallback();
-    this._initChildInsertionListener();
-    this._cacheListItems();
+    if (this.element.children && this.element.children.length) {
 
-    if (this.get('showItems')) {
-      run.scheduleOnce('afterRender', this, '_triggerAnimation');
+      // TODO: DRY up this sequence
+      this._cacheListItems();
+      this._prepareItemsInDOM();
+      debugger;
+      if (this.get('showItems') && this.get('isReadyToAnimate')) {
+        this._triggerAnimation();
+      }
+    } else {
+      this._initChildInsertionCallback();
+      this._initChildInsertionListener();
     }
-
   },
 
 
@@ -287,9 +307,12 @@ export default Mixin.create({
         this.element.classList.remove(classToRemove);
         this.element.classList.add(classToAdd);
       });
-      run.scheduleOnce('afterRender', this, () => {
-        this._triggerAnimation();
-      });
+
+      if (this.get('isReadyToAnimate')) {
+        run.scheduleOnce('afterRender', this, () => {
+          this._triggerAnimation();
+        });
+      }
     }
   },
 
@@ -309,6 +332,7 @@ export default Mixin.create({
 
 
   _cacheListItems () {
+    debugger;
     this._listItemElems = Array.from(this.element.children);
   },
 
@@ -331,16 +355,26 @@ export default Mixin.create({
   },
 
   _initChildInsertionCallback () {
-    this._onChildElementsInserted = function onChildElementsInserted (event) {
+    this._onChildElementsInserted = function onChildElementsInserted () {
       run.scheduleOnce('afterRender', this, () => {
         this._cacheListItems();
         this._prepareItemsInDOM();
+
+        if (this.get('showItems') && this.get('isReadyToAnimate')) {
+          this._triggerAnimation();
+        }
       });
     }
   },
 
+  /**
+   * For components whose child elements are asynchronously rendered,
+   * we can listen for the completion of such rendering and cache our
+   * list items then.
+   */
   _initChildInsertionListener () {
     this._childInsertionListener = new MutationObserver(function childInsertionListener (mutations) {
+      debugger;
       this._onChildElementsInserted();
     }.bind(this));
 

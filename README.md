@@ -18,19 +18,19 @@ By default, the component treats all direct child elements as its "list items":
 ```
 
 <h2> Spell Ingredients </h2>
-{{#stagger-list items=potions}}
+{{#stagger-set items=potions}}
 
   {{#each potions as |potion|}}
     <li>{{potion.name}}</li>
   {{/each}}
 
-{{/stagger-list}}
+{{/stagger-set}}
 
 ```
 
 `ember-stagger-swagger` exposes a component mixin that can be imported directly from the addon:
 ```
-import StaggerListMixin from 'ember-stagger-swagger/mixins/stagger-list';
+import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 ```
 
 ### Specifying the stagger direction
@@ -43,7 +43,7 @@ import StaggerListMixin from 'ember-stagger-swagger/mixins/stagger-list';
 ### Future Goals
 * Removing need for any CSS by using the Web Animations API.
   * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `stagger-swagger's` zero-dependency design goals.
-  
+
 
 
 
