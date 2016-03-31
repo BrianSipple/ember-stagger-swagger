@@ -1,6 +1,6 @@
-# Ember-stagger-swagger
+# ember-stagger-swagger
 
-*Ember Addon for staggered list item animations*
+*Stagger animation for Ember Components*
 
 
 ## Initial installation
@@ -50,7 +50,19 @@ The minimum amount of configuration required for a `stagger-set` component to ge
 ### Specifying Custom Keyframes
 
 
-### Future Goals
+## Hooks
+
+* `onAnimationStart`: called immediately after the last item in the set triggers its [`animationstart`](https://developer.mozilla.org/en-US/docs/Web/Events/animationstart) event.
+  * called with:
+    * `animationEvent`: the [`animationevent` object](https://developer.mozilla.org/en-US/docs/Web/Events/animationstart#Properties)
+
+* `onAnimationComplete`: called immediately after the last item in the set triggers its [`animationend`](https://developer.mozilla.org/en-US/docs/Web/Events/animationend) event.
+  * called with:
+    * `animationEvent`: the [`animationevent` object](https://developer.mozilla.org/en-US/docs/Web/Events/animationend#Properties)
+
+Together, these hooks can provide more control over interactions with the component during its animation. For example, if you set up a button to trigger toggles of the animation, you might want to make sure that its disable between the start and completion events.
+
+## Future Goals
 * Removing need for any CSS by using the Web Animations API.
   * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `stagger-swagger's` zero-dependency design goals.
 

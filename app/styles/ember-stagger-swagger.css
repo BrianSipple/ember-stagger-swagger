@@ -1,5 +1,4 @@
 @import './_keyframes.css';
-@import './_durations.css';
 
 ._ember-stagger-swagger_stagger-list {
 
@@ -14,15 +13,13 @@
 
   &.items-showing {
     > * {
-      visibility: visible;
-      /*animation-duration: var(--anim-duration__slide-element);*/
+      /*visibility: visible;*/
       animation-fill-mode: forwards;
     }
   }
 
   &.items-collapsing {
     > * {
-      /*animation-duration: var(--anim-duration__slide-element);*/
       animation-fill-mode: forwards;
     }
   }

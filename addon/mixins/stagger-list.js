@@ -176,6 +176,11 @@ export default Mixin.create({
   isAnimating: false,
 
   /**
+   * Callback (to be initialized) for our animationstart event listener
+   */
+  _onStaggerStart: null,
+
+  /**
    * Callback (to be initialized) for our animationend event listener
    */
   _onStaggerComplete: null,
@@ -197,7 +202,6 @@ export default Mixin.create({
   hasItemsToAnimate: notEmpty('_listItemElems'),
 
   isReadyToAnimate: computed('hasItemsToAnimate', 'isAnimating', function isReadyToAnimate () {
-    debugger;
     return this.get('hasItemsToAnimate') && !this.get('isAnimating');
   }),
 
@@ -261,10 +265,6 @@ export default Mixin.create({
       this._cacheListItems();
       this._prepareItemsInDOM();
 
-      // if (this.get('showItems') && this.get('isReadyToAnimate')) {
-      //   this._triggerAnimation();
-      // }
-
     } else {
       this._initChildInsertionCallback();
       this._initChildInsertionListener();
@@ -302,6 +302,12 @@ export default Mixin.create({
   willDestroyElement () {
     this._super(...arguments);
 
+    // TODO: Pull out and DRY up
+    this.element.removeEventListener('animationstart', this._onStaggerStart);
+    this.element.removeEventListener('webkitAnimationStart', this._onStaggerStart);
+    this.element.removeEventListener('oAnimationStart', this._onStaggerStart);
+    this.element.removeEventListener('msAnimationStart', this._onStaggerStart);
+
     this.element.removeEventListener('animationend', this._onStaggerComplete);
     this.element.removeEventListener('webkitAnimationEnd', this._onStaggerComplete);
     this.element.removeEventListener('oAnimationEnd', this._onStaggerComplete);
@@ -319,16 +325,44 @@ export default Mixin.create({
 
   _initAnimationCallbacks () {
 
-    /* AnimationEvent listener to handle keeping the list items hidden */
+    this._onStaggerStart = function onStaggerStart (event) {
+      this.send('broadcastAnimationStart', event);
+    }.bind(this);
+
+    /**
+     * AnimationEvent listener for the `animationend` event fired by each
+     * child item.
+     *
+     * Because each item will have completed its animation before
+     * the next, its `animationend` event will be fired when the set, as a whole,
+     * still occupies two distinct states.
+     *
+     * As such, we'll want to intercept `animationend` on the first item and
+     * and last item, and only toggle the class for `itemsHidden` once (once because it's a toggle, and
+     * and also to limit what already feels like a suboptimal DOM write),
+     *
+     * If the event corresponds to the last item, will trigger a run loop call
+     * that will fire immediately after the animation and update `isAnimating`
+     *
+     */
     this._onStaggerComplete = function onStaggerComplete (event) {
 
       // only update the DOM after we've finished animating all items
-      const lastListItemElem = this.element.lastElementChild;
+      const firstListItemElem = this._listItemElems[0];
+      const lastListItemElem = this._listItemElems[this._listItemElems.length - 1];
+      const targetElem = event.target;
+      const isEntering = this.get('showItems');
 
-      if (Object.is(event.target, lastListItemElem)) {
+      if (isEntering && Object.is(targetElem, firstListItemElem)) {
+        this.element.classList.toggle(CLASS_NAMES.itemsHidden);
+
+      } else if (Object.is(targetElem, lastListItemElem)) {
+        if (!isEntering) {
+          this.element.classList.toggle(CLASS_NAMES.itemsHidden);
+        }
         run.once(() => {
           this.set('isAnimating', false);
-          this.element.classList.toggle(CLASS_NAMES.itemsHidden);
+          this.send('broadcastAnimationComplete', event);
         });
       }
 
@@ -340,10 +374,6 @@ export default Mixin.create({
       run.scheduleOnce('afterRender', this, () => {
         this._cacheListItems();
         this._prepareItemsInDOM();
-
-        // if (this.get('showItems') && this.get('isReadyToAnimate')) {
-        //   this._triggerAnimation();
-        // }
       });
     }
   },
@@ -355,7 +385,6 @@ export default Mixin.create({
    */
   _initChildInsertionListener () {
     this._childInsertionListener = new MutationObserver(function childInsertionListener (mutations) {
-      debugger;
       this._onChildElementsInserted();
     }.bind(this));
 
@@ -363,11 +392,14 @@ export default Mixin.create({
   },
 
   _prepareItemsInDOM () {
-    // if (!this.showItems) {
-    //   this.element.classList.add(CLASS_NAMES.itemsHidden);
-    // }
-
     this._setInitialAnimationValuesForItems();
+
+    // TODO: Pull out and dry up
+    this.element.addEventListener('animationstart', this._onStaggerStart, false);
+    this.element.addEventListener('webkitAnimationStart', this._onStaggerStart, false);
+    this.element.addEventListener('oAnimationStart', this._onStaggerStart, false);
+    this.element.addEventListener('msAnimationStart', this._onStaggerStart, false);
+
     this.element.addEventListener('animationend', this._onStaggerComplete, false);
     this.element.addEventListener('webkitAnimationEnd', this._onStaggerComplete, false);
     this.element.addEventListener('oAnimationEnd', this._onStaggerComplete, false);
@@ -442,14 +474,12 @@ export default Mixin.create({
   },
 
   _triggerAnimation() {
-    debugger;
     const currentAnimationName = this.get('currentAnimationName');
     const currentStaggerInterval = this.get('staggerInterval');
     const currentAnimationDuration = `${this.get('currentAnimationDuration')}ms`;
     const currentAnimationTimingFunction = this.get('currentAnimationTimingFunction');
 
     this.set('isAnimating', true);
-    this.element.classList.remove(CLASS_NAMES.itemsHidden);
     this._listItemElems.forEach((listItemElem, idx) => {
       setElementStyleProperty(listItemElem, 'animationDelay', `${currentStaggerInterval * (idx + 1)}ms`);
       setElementStyleProperty(listItemElem, 'animationTimingFunction', currentAnimationTimingFunction);
@@ -458,4 +488,18 @@ export default Mixin.create({
     });
   },
 
+  actions: {
+
+    broadcastAnimationStart(animationEvent) {
+      if (typeof this.onAnimationStart === 'function') {
+        this.onAnimationStart(animationEvent);
+      }
+    },
+
+    broadcastAnimationComplete(animationEvent) {
+      if (typeof this.onAnimationComplete === 'function') {
+        this.onAnimationComplete(animationEvent);
+      }
+    },
+  }
 });
