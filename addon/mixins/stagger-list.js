@@ -119,26 +119,6 @@ const KEYFRAMES_MAP = {
       [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
     },
   },
-  // [ANIMATION_DIRECTIONS.LEFT]: {
-  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
-  //   out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
-  //   inverseDirection: ANIMATION_DIRECTIONS.RIGHT,
-  // },
-  // [ANIMATION_DIRECTIONS.DOWN]: {
-  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
-  //   out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
-  //   inverseDirection: ANIMATION_DIRECTIONS.UP,
-  // },
-  // [ANIMATION_DIRECTIONS.RIGHT]: {
-  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
-  //   out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
-  //   inverseDirection: ANIMATION_DIRECTIONS.LEFT,
-  // },
-  // [ANIMATION_DIRECTIONS.UP]: {
-  //   in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
-  //   out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
-  //   inverseDirection: ANIMATION_DIRECTIONS.DOWN,
-  // },
 };
 
 const ANIMATION_NAME_PREFIXES  = [
@@ -215,6 +195,7 @@ export default Mixin.create({
   _listItemElems: null,
 
   hasItemsToAnimate: notEmpty('_listItemElems'),
+
   isReadyToAnimate: computed('hasItemsToAnimate', 'isAnimating', function isReadyToAnimate () {
     debugger;
     return this.get('hasItemsToAnimate') && !this.get('isAnimating');
@@ -276,13 +257,14 @@ export default Mixin.create({
     this._initAnimationCallbacks();
     if (this.element.children && this.element.children.length) {
 
-      // TODO: DRY up this sequence
+      // TODO: DRY up this sequence?
       this._cacheListItems();
       this._prepareItemsInDOM();
-      debugger;
-      if (this.get('showItems') && this.get('isReadyToAnimate')) {
-        this._triggerAnimation();
-      }
+
+      // if (this.get('showItems') && this.get('isReadyToAnimate')) {
+      //   this._triggerAnimation();
+      // }
+
     } else {
       this._initChildInsertionCallback();
       this._initChildInsertionListener();
@@ -332,7 +314,6 @@ export default Mixin.create({
 
 
   _cacheListItems () {
-    debugger;
     this._listItemElems = Array.from(this.element.children);
   },
 
@@ -360,9 +341,9 @@ export default Mixin.create({
         this._cacheListItems();
         this._prepareItemsInDOM();
 
-        if (this.get('showItems') && this.get('isReadyToAnimate')) {
-          this._triggerAnimation();
-        }
+        // if (this.get('showItems') && this.get('isReadyToAnimate')) {
+        //   this._triggerAnimation();
+        // }
       });
     }
   },
@@ -461,6 +442,7 @@ export default Mixin.create({
   },
 
   _triggerAnimation() {
+    debugger;
     const currentAnimationName = this.get('currentAnimationName');
     const currentStaggerInterval = this.get('staggerInterval');
     const currentAnimationDuration = `${this.get('currentAnimationDuration')}ms`;

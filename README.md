@@ -10,15 +10,15 @@ ember install ember-stagger-swagger
 
 ## Usage
 
-`ember-stagger-swagger` ships with a `stagger-list` component that can be used directly in a template to wrap
+`ember-stagger-swagger` ships with a `stagger-set` component that can be used directly in a template to wrap
 the items you wish to animate.
 
-By default, the component treats all direct child elements as its "list items":
+The component treats all direct child elements as its "list items":
 
 ```
 
 <h2> Spell Ingredients </h2>
-{{#stagger-set items=potions}}
+{{#stagger-set}}
 
   {{#each potions as |potion|}}
     <li>{{potion.name}}</li>
@@ -32,6 +32,16 @@ By default, the component treats all direct child elements as its "list items":
 ```
 import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 ```
+
+### Configuring animation
+
+Technically, a `stagger-set` component has no required arguments; it will simply wrap its content in a `<div>` element if left unmodified. This is so that it can be configured in several different ways before making any assumptions about how to render items, compute animation values, etc.
+
+With that in mind, let's see how we can really move things.
+
+
+The minimum amount of configuration required for a `stagger-set` component to get things moving, so to speak, is either an `inDirection` or `outDirection` matching one of either `left`, `down`, `right`, or `up`.
+
 
 ### Specifying the stagger direction
 
