@@ -9,6 +9,7 @@
  */
 import Ember from 'ember';
 import setElementStyleProperty from 'ember-stagger-swagger/utils/set-element-style-property';
+import getAnimationPrefix from 'ember-stagger-swagger/utils/get-animation-prefix';
 
 const {
   Mixin,
@@ -394,16 +395,13 @@ export default Mixin.create({
   _prepareItemsInDOM () {
     this._setInitialAnimationValuesForItems();
 
-    // TODO: Pull out and dry up
-    this.element.addEventListener('animationstart', this._onStaggerStart, false);
-    this.element.addEventListener('webkitAnimationStart', this._onStaggerStart, false);
-    this.element.addEventListener('oAnimationStart', this._onStaggerStart, false);
-    this.element.addEventListener('msAnimationStart', this._onStaggerStart, false);
+    debugger;
+    const animationPrefix = getAnimationPrefix(this.element);
+    const startEvent = animationPrefix ? `${animationPrefix}AnimationStart` : 'animationstart';
+    const endEvent = animationPrefix ? `${animationPrefix}AnimationEnd` : 'animationend';
 
-    this.element.addEventListener('animationend', this._onStaggerComplete, false);
-    this.element.addEventListener('webkitAnimationEnd', this._onStaggerComplete, false);
-    this.element.addEventListener('oAnimationEnd', this._onStaggerComplete, false);
-    this.element.addEventListener('msAnimationEnd', this._onStaggerComplete, false);
+    this.element.addEventListener(`${startEvent}`, this._onStaggerStart, false);
+    this.element.addEventListener(`${endEvent}`, this._onStaggerComplete, false);
   },
 
 
