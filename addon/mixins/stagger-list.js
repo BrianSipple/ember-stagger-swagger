@@ -203,6 +203,12 @@ export default Mixin.create({
    */
   _listItemElems: null,
 
+  /**
+   * We'll be caching the animation prefix (if any) that's needed to
+   * modify DOM element style properties.
+   */
+  _animationPrefix: null,
+
   hasItemsToAnimate: notEmpty('_listItemElems'),
 
   isReadyToAnimate: computed('hasItemsToAnimate', 'isAnimating', function isReadyToAnimate () {
@@ -265,9 +271,7 @@ export default Mixin.create({
     this._initAnimationCallbacks();
     if (this.element.children && this.element.children.length) {
 
-      // TODO: DRY up this sequence?
-      this._cacheListItems();
-      this._prepareItemsInDOM();
+      this._syncWithDOM();
 
     } else {
       this._initChildInsertionCallback();
@@ -306,16 +310,12 @@ export default Mixin.create({
   willDestroyElement () {
     this._super(...arguments);
 
-    // TODO: Pull out and DRY up
-    this.element.removeEventListener('animationstart', this._onStaggerStart);
-    this.element.removeEventListener('webkitAnimationStart', this._onStaggerStart);
-    this.element.removeEventListener('oAnimationStart', this._onStaggerStart);
-    this.element.removeEventListener('msAnimationStart', this._onStaggerStart);
+    const animationPrefix = this.get('animationPrefix');
+    const startEvent = animationPrefix ? `${animationPrefix}AnimationStart` : 'animationstart';
+    const endEvent = animationPrefix ? `${animationPrefix}AnimationEnd` : 'animationend';
 
-    this.element.removeEventListener('animationend', this._onStaggerComplete);
-    this.element.removeEventListener('webkitAnimationEnd', this._onStaggerComplete);
-    this.element.removeEventListener('oAnimationEnd', this._onStaggerComplete);
-    this.element.removeEventListener('msAnimationEnd', this._onStaggerComplete);
+    this.element.removeEventListener(`${startEvent}`, this._onStaggerStart, false);
+    this.element.removeEventListener(`${endEvent}`, this._onStaggerComplete, false);
 
     this._listItemElems = null;
     this._childInsertionListener.disconnect();
@@ -325,6 +325,10 @@ export default Mixin.create({
 
   _cacheListItems () {
     this._listItemElems = Array.from(this.element.children);
+  },
+
+  _cacheAnimationPrefix () {
+    this.set('_animationPrefix', getAnimationPrefix(this.element));
   },
 
   _initAnimationCallbacks () {
@@ -382,11 +386,16 @@ export default Mixin.create({
     }.bind(this);
   },
 
+  _syncWithDOM () {
+    this._cacheListItems();
+    this._cacheAnimationPrefix();
+    this._prepareItemsInDOM();
+  },
+
   _initChildInsertionCallback () {
     this._onChildElementsInserted = function onChildElementsInserted () {
       run.scheduleOnce('afterRender', this, () => {
-        this._cacheListItems();
-        this._prepareItemsInDOM();
+        this._syncWithDOM();
       });
     }
   },
@@ -408,7 +417,7 @@ export default Mixin.create({
     this._setInitialAnimationValuesForItems();
 
     debugger;
-    const animationPrefix = getAnimationPrefix(this.element);
+    const animationPrefix = this.get('_animationPrefix');
     const startEvent = animationPrefix ? `${animationPrefix}AnimationStart` : 'animationstart';
     const endEvent = animationPrefix ? `${animationPrefix}AnimationEnd` : 'animationend';
 
@@ -476,6 +485,7 @@ export default Mixin.create({
     const easingFunction = this.get('currentAnimationTimingFunction');
     const animationDuration = `${this.get('currentAnimationDuration')}ms`;
 
+    // TODO: Improve this -- we've already cached the proper prefix by the time we get here!
     this._listItemElems.forEach((listItemElem, idx) => {
       setElementStyleProperty(listItemElem, 'animationDelay', `${initialDelay + (staggerInterval * (idx + 1))}ms`);
       setElementStyleProperty(listItemElem, 'animationTimingFunction', easingFunction);
