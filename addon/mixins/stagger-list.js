@@ -328,6 +328,7 @@ export default Mixin.create({
 
     this._onStaggerStart = function onStaggerStart (event) {
       this.send('broadcastAnimationStart', event);
+
     }.bind(this);
 
     /**

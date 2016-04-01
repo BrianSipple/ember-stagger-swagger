@@ -7,13 +7,12 @@
   &.items-hidden {
     > * {
       visibility: hidden;
-      opacity: 0;
+      /*opacity: 0;*/
     }
   }
 
   &.items-showing {
     > * {
-      /*visibility: visible;*/
       animation-fill-mode: forwards;
     }
   }
