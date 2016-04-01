@@ -124,12 +124,6 @@ const KEYFRAMES_MAP = {
   },
 };
 
-const ANIMATION_NAME_PREFIXES  = [
-  'webkit',
-  'ms',
-  'moz',
-  'o',
-];
 
 export default Mixin.create({
 
@@ -146,8 +140,6 @@ export default Mixin.create({
    */
   showItems: true,
 
-  /* trigger the entrance animation when this element is inserted into the DOM */
-  enterOnRender: false,
 
   /* MILLESECONDS */
   staggerInterval: null,
@@ -174,10 +166,13 @@ export default Mixin.create({
   outDuration: 0.5,
   duration: 0.5,  // single duration for both in and out
 
-  /* ----------------------- /API ------------------------ */
 
+  /* ----------------------- /API ------------------------ */
   isAnimating: false,
   hasListToggled: false,
+
+  /* trigger the entrance animation when this element is inserted into the DOM */
+  enterOnRender: true,  // TODO: Support
 
   /**
    * Callback (to be initialized) for our animationstart event listener
@@ -358,22 +353,14 @@ export default Mixin.create({
 
       // only update the DOM after we've finished animating all items
       const hasListToggled = this.get('hasListToggled');
-      const firstListItemElem = this._listItemElems[0];
       const lastListItemElem = this._listItemElems[this._listItemElems.length - 1];
       const targetElem = event.target;
-      const isEntering = this.get('showItems');
 
       if (!hasListToggled) {
         targetElem.classList.add(CLASS_NAMES.listItemCompletedInitialToggle);
       }
 
-      if (isEntering && Object.is(targetElem, firstListItemElem)) {
-        // this.element.classList.remove(CLASS_NAMES.itemsHidden);
-
-      } else if (Object.is(targetElem, lastListItemElem)) {
-        if (!isEntering) {
-          // this.element.classList.add(CLASS_NAMES.itemsHidden);
-        }
+      if (Object.is(targetElem, lastListItemElem)) {
         if (!hasListToggled) {
           this.set('hasListToggled', true);
         }
@@ -416,7 +403,6 @@ export default Mixin.create({
   _prepareItemsInDOM () {
     this._setAnimationValuesForItems();
 
-    debugger;
     const animationPrefix = this.get('_animationPrefix');
     const startEvent = animationPrefix ? `${animationPrefix}AnimationStart` : 'animationstart';
     const endEvent = animationPrefix ? `${animationPrefix}AnimationEnd` : 'animationend';

@@ -11,22 +11,5 @@
       }
     }
   }
-  /*&.items-hidden {
-    > * {
-      visibility: hidden;
-      opacity: 0;
-    }
-  }*/
-
-  &.items-showing {
-    > * {
-      /*animation-fill-mode: forwards;*/
-    }
-  }
-
-  &.items-collapsing {
-    > * {
-      /*animation-fill-mode: forwards;*/
-    }
-  }
+  
 }
