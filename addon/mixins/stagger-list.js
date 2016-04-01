@@ -161,10 +161,10 @@ export default Mixin.create({
   outTimingFunc: null,
   timingFunc: null, // single timing function for both in and out
 
-  /* Duration (seconds) */
-  inDuration: 0.5,
-  outDuration: 0.5,
-  duration: 0.5,  // single duration for both in and out
+  /* Duration (milleseconds) */
+  inDuration: 0,
+  outDuration: 0,
+  duration: 0,  // single duration for both in and out
 
 
   /* ----------------------- /API ------------------------ */
@@ -204,9 +204,6 @@ export default Mixin.create({
    */
   _animationPrefix: null,
 
-  _needsToAnimateAfterInit: false,  // private member to set to true after items are rendered when `enterOnRender` is true
-
-
 
   hasItemsToAnimate: notEmpty('_listItemElems'),
 
@@ -228,7 +225,6 @@ export default Mixin.create({
     'showItems',
     'needsToAnimateAfterInit',
     function currentAnimationName() {
-      debugger;
       return ( this.get('showItems') || this.get('needsToAnimateAfterInit') ) ?
         this.get('_inAnimationName')
         :
@@ -294,39 +290,21 @@ export default Mixin.create({
   /**
    * Trigger the staggering animation when something on the outside updates `showItems`
    */
-  didReceiveAttrs (attrData) {
+  didUpdateAttrs (attrData) {
     this._super(...arguments);
+    const oldShowItems = (
+      typeof attrData.oldAttrs.showItems.value !== 'undefined' &&
+      attrData.oldAttrs.showItems.value
+    );
 
-    debugger;
-    const showItems = attrData.newAttrs.showItems.value;
-    const needsToAnimateAfterInit = this.get('needsToAnimateAfterInit');
+    const newShowItems = (
+      typeof attrData.newAttrs.showItems.value !== 'undefined' &&
+      attrData.newAttrs.showItems.value
+    );
 
-    if (this.get('isReadyToAnimate')) {
-
-      if (
-        needsToAnimateAfterInit ||
-        (
-          typeof attrData.oldAttrs !== 'undefined' &&
-          showItems !== attrData.oldAttrs.showItems.value
-        )
-      ) {
-        run.scheduleOnce('afterRender', this, '_triggerAnimation');
-      }
+    if (oldShowItems !== newShowItems && this.get('isReadyToAnimate')) {
+      run.scheduleOnce('afterRender', this, '_triggerAnimation');
     }
-    // animate when showItems has changed, or if this is the inital reception and `showItems` is true
-    // if (typeof attrData.oldAttrs === 'undefined' || showItems !== attrData.oldAttrs.showItems.value) {
-    //   if (this.get('isReadyToAnimate')) {
-    //     run.scheduleOnce('afterRender', this, () => {
-    //       this._triggerAnimation();
-    //     });
-    //   }
-    // }
-  },
-
-  didUpdateAttrs () {
-    this._super(...arguments);
-
-    debugger;
   },
 
 
@@ -366,16 +344,10 @@ export default Mixin.create({
      * AnimationEvent listener for the `animationend` event fired by each
      * child item.
      *
-     * Because each item will have completed its animation before
-     * the next, its `animationend` event will be fired when the set, as a whole,
-     * still occupies two distinct states.
-     *
-     * As such, we'll want to intercept `animationend` on the first item and
-     * and last item, and only toggle the class for `itemsHidden` once (once because it's a toggle, and
-     * and also to limit what already feels like a suboptimal DOM write),
-     *
-     * If the event corresponds to the last item, will trigger a run loop call
-     * that will fire immediately after the animation and update `isAnimating`
+     * If the event corresponds to the last item, we'll trigger a run loop call
+     * that will fire immediately after the animation and
+     * update `hasListToggled` (if necessary), `isAnimating`, and
+     * tell our `broadcastAnimationComplete` action to fire
      *
      */
     this._onStaggerComplete = function onStaggerComplete (event) {
