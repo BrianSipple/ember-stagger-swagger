@@ -1,6 +1,6 @@
 # ember-stagger-swagger
 
-*Stagger animation for Ember Components*
+*Stagger animation for Ember Components (see the demo [here](demo-link))*
 
 
 ## Initial installation
@@ -10,14 +10,13 @@ ember install ember-stagger-swagger
 
 ## Usage
 
-`ember-stagger-swagger` ships with a `stagger-set` component that can be used directly in a template to wrap
-the items you wish to animate.
+`ember-stagger-swagger` ships with a `stagger-set` component that can be used directly in a template to wrap the items that you wish to animate.
 
 The component treats all direct child elements as its "list items":
 
 ```
 
-<h2> Spell Ingredients </h2>
+<h2>Spell Ingredients </h2>
 {{#stagger-set}}
 
   {{#each potions as |potion|}}
@@ -33,7 +32,58 @@ The component treats all direct child elements as its "list items":
 import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 ```
 
-### Configuring animation
+## API
+
+##### <a name="api-inDirection"></a>`inDirection`  
+  * _description_: The direction of animation when the items stagger into view.
+  * _required_: maybe (if no `outDirection` is set)
+  * _default_: The provided `outDirection`.
+  * _constraints_: The direction must be a keyword matching either `left`, `down`, `right`, or `up`.
+
+##### <a name="api-outDirection"></a> `outDirection`  
+  * _description_: The direction of animation when the items stagger out of view. The direction must be a keyword matching either `left`, `down`, `right`, or `up`.
+  * _required_: maybe (if no `inDirection` is set)
+  * _default_: The provided `inDirection`.
+  * _constraints_: The direction must be a keyword matching either `left`, `down`, `right`, or `up`.  
+
+##### <a name="api-enterOnRender"></a> `enterOnRender`  
+  * _description_: Whether or not the elements in the stagger set should animate into view when the component is rendered.
+  * _required_: no
+  * _default_: `true`
+  * _constraints_: `true` or `false`  
+
+##### <a name="api-showItems"></a> `showItems`  
+  * _description_: Manual hook for toggling the animation back and forth according to its in and out settings.
+  * _required_: no
+  * _default_: `true` to correspond with [`enterOnRender`](#api-enterOnRender)'s default.
+  * _constraints_: `true` or `false`    
+
+
+##### <a name="api-staggerInterval"></a> `staggerInterval`
+  * _description_: the number of milleseconds between the animation of successive items in the set.
+  * _required_: no
+  * _default_: 32ms. 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered but still-perceptively [smooth and fluid motion](https://en.wikipedia.org/wiki/Traditional_animation#.22Shooting_on_twos.22).
+  * _constraints_: a number value greater than or equal to 32.
+
+
+##### <a name="api-inDelay"></a> `inDelay`  
+  * _description_: Duration of delay for the items' entrance animation (when the animation is activated).
+  * _required_: no
+  * _default_: 0
+  * _constraints_: a number value greater than or equal to 0.
+
+##### <a name="api-outDelay"></a> `outDelay`  
+  * _description_: Duration of delay for the items' exit animation (when the animation is activated).
+  * _required_: no
+  * _default_: 0
+  * _constraints_: a number value greater than or equal to 0.
+
+
+
+
+
+
+#### Practical Tips
 
 Technically, a `stagger-set` component has no required arguments; it will simply wrap its content in a `<div>` element if left unmodified. This is so that it can be configured in several different ways before making any assumptions about how to render items, compute animation values, etc.
 
@@ -43,7 +93,9 @@ With that in mind, let's see how we can really move things.
 The minimum amount of configuration required for a `stagger-set` component to get things moving, so to speak, is either an `inDirection` or `outDirection` matching one of either `left`, `down`, `right`, or `up`.
 
 
+
 ### Specifying the stagger direction
+
 
 
 

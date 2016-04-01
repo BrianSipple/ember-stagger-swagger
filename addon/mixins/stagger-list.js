@@ -21,7 +21,6 @@ const {
 
 const {
   notEmpty,
-  bool,
 } = computed;
 
 
@@ -34,7 +33,7 @@ const defaults = {
    */
   STAGGER_INTERVAL: 32,
 
-  INITIAL_DELAY: 0,
+  ANIMATION_DELAY: 0,
 
   TOTAL_DURATION_MS: 500,
 
@@ -130,7 +129,11 @@ export default Mixin.create({
   classNames: ['_ember-stagger-swagger_stagger-list'],
   classNameBindings: [`hasListToggled::${CLASS_NAMES.untoggled}`],
 
-  /* ----------------------- API ------------------------ */
+  /**
+   * -------------------------------------------------------------------- *
+   * ----------------------- API ------------------------ *
+   * -------------------------------------------------------------------- *
+   */
 
   /**
    * Flag for manually triggering either the show or hide animation
@@ -140,12 +143,19 @@ export default Mixin.create({
    */
   showItems: true,
 
+  /* trigger the entrance animation when this element is inserted into the DOM */
+  enterOnRender: true,  // TODO: Support
+
 
   /* MILLESECONDS */
   staggerInterval: null,
 
   /* MILLESECONDS */
-  initialDelay: null,
+  animationDelay: null,
+
+  // TODO: Support
+  // inDelay: null,
+  // outDelay: null,
 
   inDirection: null,
   outDirection: null,
@@ -165,14 +175,15 @@ export default Mixin.create({
   inDuration: 0,
   outDuration: 0,
   duration: 0,  // single duration for both in and out
+  /**
+   * -------------------------------------------------------------------- *
+   * ----------------------- /API ------------------------ *
+   * -------------------------------------------------------------------- *
+   */
 
-
-  /* ----------------------- /API ------------------------ */
   isAnimating: false,
   hasListToggled: false,
 
-  /* trigger the entrance animation when this element is inserted into the DOM */
-  enterOnRender: true,  // TODO: Support
 
   /**
    * Callback (to be initialized) for our animationstart event listener
@@ -431,14 +442,14 @@ export default Mixin.create({
       /* eslint-enable max-len */
     }
 
-    if (!this.initialDelay) {
-      this.initialDelay = defaults.INITIAL_DELAY;
+    if (!this.animationDelay) {
+      this.animationDelay = defaults.ANIMATION_DELAY;
 
     } else {
 
       /* eslint-disable max-len */
       warn(
-        `The initial delay that you attempted to specify was invalid. Please use a numeric value. Defaulting to ${defaults.INITIAL_DELAY}`,
+        `The initial delay that you attempted to specify was invalid. Please use a numeric value. Defaulting to ${defaults.ANIMATION_DELAY}`,
         !Number.isNaN(Number(this.staggerInterval))
       );
       /* eslint-enable max-len */
