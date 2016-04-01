@@ -3,13 +3,20 @@
 ._ember-stagger-swagger_stagger-list {
 
   /* TODO: JS all the things? */
-
-  &.items-hidden {
+  &.hasnt-entered {
     > * {
-      visibility: hidden;
-      /*opacity: 0;*/
+      &:not(.completed-initial-enter) {
+        visibility: hidden;
+        opacity: 0;
+      }
     }
   }
+  /*&.items-hidden {
+    > * {
+      visibility: hidden;
+      opacity: 0;
+    }
+  }*/
 
   &.items-showing {
     > * {

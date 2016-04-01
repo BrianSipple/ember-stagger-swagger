@@ -44,6 +44,8 @@ const defaults = {
 
 
 const CLASS_NAMES = {
+  untoggled: 'hasnt-entered',
+  listItemCompletedInitialToggle: 'completed-initial-enter',
   itemsHidden: 'items-hidden',
   itemsShowing: 'items-showing',
   itemsCollapsing: 'items-collapsing',
@@ -131,8 +133,8 @@ const ANIMATION_NAME_PREFIXES  = [
 
 export default Mixin.create({
 
-  classNames: ['_ember-stagger-swagger_stagger-list', CLASS_NAMES.itemsHidden],
-
+  classNames: ['_ember-stagger-swagger_stagger-list'],
+  classNameBindings: [`hasListToggled::${CLASS_NAMES.untoggled}`],
 
   /* ----------------------- API ------------------------ */
 
@@ -175,6 +177,7 @@ export default Mixin.create({
   /* ----------------------- /API ------------------------ */
 
   isAnimating: false,
+  hasListToggled: false,
 
   /**
    * Callback (to be initialized) for our animationstart event listener
@@ -287,8 +290,8 @@ export default Mixin.create({
       const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
 
       run.once(() => {
-        this.element.classList.remove(classToRemove);
         this.element.classList.add(classToAdd);
+        this.element.classList.remove(classToRemove);
       });
 
       if (this.get('isReadyToAnimate')) {
@@ -350,17 +353,25 @@ export default Mixin.create({
     this._onStaggerComplete = function onStaggerComplete (event) {
 
       // only update the DOM after we've finished animating all items
+      const hasListToggled = this.get('hasListToggled');
       const firstListItemElem = this._listItemElems[0];
       const lastListItemElem = this._listItemElems[this._listItemElems.length - 1];
       const targetElem = event.target;
       const isEntering = this.get('showItems');
 
+      if (!hasListToggled) {
+        targetElem.classList.add(CLASS_NAMES.listItemCompletedInitialToggle);
+      }
+
       if (isEntering && Object.is(targetElem, firstListItemElem)) {
-        this.element.classList.toggle(CLASS_NAMES.itemsHidden);
+        // this.element.classList.remove(CLASS_NAMES.itemsHidden);
 
       } else if (Object.is(targetElem, lastListItemElem)) {
         if (!isEntering) {
-          this.element.classList.toggle(CLASS_NAMES.itemsHidden);
+          // this.element.classList.add(CLASS_NAMES.itemsHidden);
+        }
+        if (!hasListToggled) {
+          this.set('hasListToggled', true);
         }
         run.once(() => {
           this.set('isAnimating', false);
