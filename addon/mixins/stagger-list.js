@@ -414,7 +414,7 @@ export default Mixin.create({
   },
 
   _prepareItemsInDOM () {
-    this._setInitialAnimationValuesForItems();
+    this._setAnimationValuesForItems();
 
     debugger;
     const animationPrefix = this.get('_animationPrefix');
@@ -479,33 +479,29 @@ export default Mixin.create({
   },
 
 
-  _setInitialAnimationValuesForItems () {
-    const initialDelay = this.get('initialDelay');
-    const staggerInterval = this.get('staggerInterval');
-    const easingFunction = this.get('currentAnimationTimingFunction');
-    const animationDuration = `${this.get('currentAnimationDuration')}ms`;
+  _setAnimationValuesForItems (applyName = false) {
 
-    // TODO: Improve this -- we've already cached the proper prefix by the time we get here!
-    this._listItemElems.forEach((listItemElem, idx) => {
-      setElementStyleProperty(listItemElem, 'animationDelay', `${initialDelay + (staggerInterval * (idx + 1))}ms`);
-      setElementStyleProperty(listItemElem, 'animationTimingFunction', easingFunction);
-      setElementStyleProperty(listItemElem, 'animationDuration', animationDuration);
-    });
-  },
-
-  _triggerAnimation() {
-    const currentAnimationName = this.get('currentAnimationName');
+    // setting an animation name is what we use to trigger the animation, so only set if asked for
+    const currentAnimationName = applyName ? this.get('currentAnimationName'): '';
     const currentStaggerInterval = this.get('staggerInterval');
     const currentAnimationDuration = `${this.get('currentAnimationDuration')}ms`;
     const currentAnimationTimingFunction = this.get('currentAnimationTimingFunction');
 
-    this.set('isAnimating', true);
+    const animationPrefix = this.get('_animationPrefix');
+    const propertyPrefix = animationPrefix ? `${animationPrefix}A` : 'a';
+
     this._listItemElems.forEach((listItemElem, idx) => {
-      setElementStyleProperty(listItemElem, 'animationDelay', `${currentStaggerInterval * (idx + 1)}ms`);
-      setElementStyleProperty(listItemElem, 'animationTimingFunction', currentAnimationTimingFunction);
-      setElementStyleProperty(listItemElem, 'animationDuration', currentAnimationDuration);
-      setElementStyleProperty(listItemElem, 'animationName', currentAnimationName);
+      listItemElem.style[`${propertyPrefix}nimationDelay`] = `${currentStaggerInterval * (idx + 1)}ms`;
+      listItemElem.style[`${propertyPrefix}nimationTimingFunction`] = currentAnimationTimingFunction;
+      listItemElem.style[`${propertyPrefix}nimationDuration`] = currentAnimationDuration;
+      listItemElem.style[`${propertyPrefix}nimationName`] = currentAnimationName;
+      listItemElem.style[`${propertyPrefix}nimationFillMode`] = 'both';
     });
+  },
+
+  _triggerAnimation() {
+    this.set('isAnimating', true);
+    this._setAnimationValuesForItems(true);
   },
 
   actions: {
