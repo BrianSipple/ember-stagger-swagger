@@ -204,6 +204,10 @@ export default Mixin.create({
    */
   _animationPrefix: null,
 
+  _needsToAnimateAfterInit: false,  // private member to set to true after items are rendered when `enterOnRender` is true
+
+
+
   hasItemsToAnimate: notEmpty('_listItemElems'),
 
   isReadyToAnimate: computed('hasItemsToAnimate', 'isAnimating', function isReadyToAnimate () {
@@ -222,8 +226,13 @@ export default Mixin.create({
     '_inAnimationName',
     '_outAnimationName',
     'showItems',
+    'needsToAnimateAfterInit',
     function currentAnimationName() {
-      return this.get('showItems') ? this.get('_inAnimationName') : this.get('_outAnimationName');
+      debugger;
+      return ( this.get('showItems') || this.get('needsToAnimateAfterInit') ) ?
+        this.get('_inAnimationName')
+        :
+        this.get('_outAnimationName');
     }
   ),
 
@@ -250,6 +259,13 @@ export default Mixin.create({
     return this.get('showItems') ? this.get('inTimingFunc') : this.get('outTimingFunc');
   }),
 
+  needsToAnimateAfterInit: computed('enterOnRender', 'hasListToggled', 'isReadyToAnimate', function needsInitialRender () {
+    return (
+      !this.get('hasListToggled') &&
+      this.get('enterOnRender') &&
+      this.get('isReadyToAnimate')
+    );
+  }),
 
   init () {
     this._super(...arguments);
@@ -264,8 +280,8 @@ export default Mixin.create({
     this._super(...arguments);
 
     this._initAnimationCallbacks();
-    if (this.element.children && this.element.children.length) {
 
+    if (this.element.children && this.element.children.length) {
       this._syncWithDOM();
 
     } else {
@@ -278,27 +294,39 @@ export default Mixin.create({
   /**
    * Trigger the staggering animation when something on the outside updates `showItems`
    */
-  didUpdateAttrs (attrData) {
+  didReceiveAttrs (attrData) {
     this._super(...arguments);
 
+    debugger;
     const showItems = attrData.newAttrs.showItems.value;
+    const needsToAnimateAfterInit = this.get('needsToAnimateAfterInit');
 
-    // animate when showItems has changed
-    if (showItems !== attrData.oldAttrs.showItems.value) {
-      const classToAdd = showItems ? CLASS_NAMES.itemsShowing : CLASS_NAMES.itemsCollapsing
-      const classToRemove = showItems ? CLASS_NAMES.itemsCollapsing : CLASS_NAMES.itemsShowing;
+    if (this.get('isReadyToAnimate')) {
 
-      run.once(() => {
-        this.element.classList.add(classToAdd);
-        this.element.classList.remove(classToRemove);
-      });
-
-      if (this.get('isReadyToAnimate')) {
-        run.scheduleOnce('afterRender', this, () => {
-          this._triggerAnimation();
-        });
+      if (
+        needsToAnimateAfterInit ||
+        (
+          typeof attrData.oldAttrs !== 'undefined' &&
+          showItems !== attrData.oldAttrs.showItems.value
+        )
+      ) {
+        run.scheduleOnce('afterRender', this, '_triggerAnimation');
       }
     }
+    // animate when showItems has changed, or if this is the inital reception and `showItems` is true
+    // if (typeof attrData.oldAttrs === 'undefined' || showItems !== attrData.oldAttrs.showItems.value) {
+    //   if (this.get('isReadyToAnimate')) {
+    //     run.scheduleOnce('afterRender', this, () => {
+    //       this._triggerAnimation();
+    //     });
+    //   }
+    // }
+  },
+
+  didUpdateAttrs () {
+    this._super(...arguments);
+
+    debugger;
   },
 
 
@@ -319,7 +347,7 @@ export default Mixin.create({
 
 
   _cacheListItems () {
-    this._listItemElems = Array.from(this.element.children);
+    this.set('_listItemElems', Array.from(this.element.children));
   },
 
   _cacheAnimationPrefix () {
@@ -329,6 +357,7 @@ export default Mixin.create({
   _initAnimationCallbacks () {
 
     this._onStaggerStart = function onStaggerStart (event) {
+      this.set('isAnimating', true);
       this.send('broadcastAnimationStart', event);
 
     }.bind(this);
@@ -377,6 +406,10 @@ export default Mixin.create({
     this._cacheListItems();
     this._cacheAnimationPrefix();
     this._prepareItemsInDOM();
+    if (this.get('needsToAnimateAfterInit')) {
+      run.scheduleOnce('afterRender', this, '_triggerAnimation');
+      //this.set('_needsToAnimateAfterInit', true);
+    }
   },
 
   _initChildInsertionCallback () {
@@ -401,7 +434,7 @@ export default Mixin.create({
   },
 
   _prepareItemsInDOM () {
-    this._setAnimationValuesForItems();
+    this._setAnimationValuesForItems(false);
 
     const animationPrefix = this.get('_animationPrefix');
     const startEvent = animationPrefix ? `${animationPrefix}AnimationStart` : 'animationstart';
@@ -486,7 +519,6 @@ export default Mixin.create({
   },
 
   _triggerAnimation() {
-    this.set('isAnimating', true);
     this._setAnimationValuesForItems(true);
   },
 
