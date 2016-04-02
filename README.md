@@ -1,9 +1,11 @@
 # ember-stagger-swagger
 
-*Stagger animation for Ember Components (see the demo [here](demo-link))*
+*GPU-only stagger animation for Ember Components*
+
+See the demo [here](demo-link)
 
 
-## Initial installation
+## Installation
 ```
 ember install ember-stagger-swagger
 ```
@@ -12,12 +14,13 @@ ember install ember-stagger-swagger
 
 `ember-stagger-swagger` ships with a `stagger-set` component that can be used directly in a template to wrap the items that you wish to animate.
 
-The component treats all direct child elements as its "list items":
+Conceptually, the component treats all direct child elements as its _set items_ or _list items_:
 
-```
+```htmlbars
 
 <h2>Spell Ingredients </h2>
-{{#stagger-set}}
+
+{{#stagger-set inDirection="right" inEffect="slideAndFade"}}
 
   {{#each potions as |potion|}}
     <li>{{potion.name}}</li>
@@ -27,8 +30,8 @@ The component treats all direct child elements as its "list items":
 
 ```
 
-`ember-stagger-swagger` exposes a component mixin that can be imported directly from the addon:
-```
+Additionally, `ember-stagger-swagger` exposes a mixin that can be imported directly from the addon and extended however you see fit:
+```js.es6
 import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 ```
 
@@ -36,7 +39,7 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 
 ##### <a name="api-inDirection"></a>`inDirection`  
   * _description_: The direction of animation when the items stagger into view.
-  * _required_: yes
+  * _required_: *yes*
   * _constraints_: A string keyword matching either `'left'`, `'down'`, `'right'`, or `'up'`.
 
 ##### <a name="api-outDirection"></a> `outDirection`  
@@ -47,7 +50,7 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 
 ##### <a name="api-inEffect"></a> `inEffect`  
   * _description_: A recognized animation effect applied to each list item when it's animating in.
-  * _required_: yes
+  * _required_: *yes*
   * _constraints_: A string keyword matching either `'slideAndFade'`, `'slide'`, `'fade'`, or `'scale'` (see the [demo](#demo) for a preview of each).
 
 ##### <a name="api-outEffect"></a> `outEffect`  
@@ -113,7 +116,7 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
   * _required_: no
   * _default_: `cubic-bezier(0.55, 0.055, 0.675, 0.19)` (AKA ["ease-in-cubic"](http://easings.net/#easeInCubic))
   * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this property is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
-  
+
 ##### <a name="api-inDuration"></a> `inDuration`  
   * _description_: The duration (in milliseconds) that *a single item* will take when animating in.
   * _required_: no
@@ -126,12 +129,6 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
   * _default_: 500
   * _constraints_: a numeric value greater than 0
 
-##### <a name="api-outDuration"></a> `outDuration`  
-  * _description_: The [animation-timing-function](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timing-function) applied to each item in the set when it's animating out.
-  * _required_: no
-  * _default_: `cubic-bezier(0.55, 0.055, 0.675, 0.19)` (AKA ["ease-in-cubic"](http://easings.net/#easeInCubic))
-  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function).
-
 ##### <a name="api-duration"></a> `duration`  
   * _description_: A convenience property to set a single duration on both the entrance and exit animations. If set alongside any `inDuration` or `outDuration`, this property will take precedence
   * _required_: no
@@ -143,22 +140,21 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 
 ### Practical Tips
 
-Technically, a `stagger-set` component has no required arguments; it will simply wrap its content in a `<div>` element if left unmodified. This is so that it can be configured in several different ways before making any assumptions about how to render items, compute animation values, etc.
+#### Styling
+Because the DOM elements of Ember components are, by default, `<div>`s, and because it handles setting an `animationName` property on the component's direct children, you can safely design, conceptualize, and style your child elements as you normally would for the list items of a relative container.
 
-With that in mind, let's see how we can really move things.
+Furthermore, because the keyframes for the built-in effects of `slide` and `slideAndFade` define transforms to bring their element in or out of its container's visible bounds (e.g., `transform: translate3d(-100, 0, 0)` at the 100%-stop of a left slide), it may well be useful to restrict overflow on the top-level component's element so that the children disappear when they're outside of said bounds.
 
+The [stagger-set "list items" demo](#demo) is an example of how this would appear.
 
-The minimum amount of configuration required for a `stagger-set` component to get things moving, so to speak, is either an `inDirection` or `outDirection` matching one of either `left`, `down`, `right`, or `up`.
+#### Creating Animation Effects
+A `stagger-set` component has only 2 required arguments: `inDirection` and `inEffect`.
 
+* Stagger directions
 
+* Effect Types
 
-#### Stagger directions
-
-#### Effect Types
-
-
-
-#### Custom Keyframes
+* Custom Keyframes
 
 
 ## Action Hooks
@@ -178,11 +174,7 @@ Together, these hooks can provide more control over interactions with the compon
 * Improved vertical slide effects
   * possibly break the mixins apart to deal with vertical and horizontal animation separately?
 * Removing need for any CSS by using the Web Animations API.
-  * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `stagger-swagger's` zero-dependency design goals.
-
-
-
-
+  * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `ember-stagger-swagger's` zero-dependency design goals.
 
 
 ## Developing Locally
