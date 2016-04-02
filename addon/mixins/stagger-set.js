@@ -238,9 +238,10 @@ export default Mixin.create({
   ),
 
   currentAnimationDuration: computed('duration', 'inDuration', 'outDuration', 'showItems', function computeDuration () {
-    // give priority to a specified in/out duration
-    if (!isNone(this.get('duration'))) {
-      return this.get('duration');
+    // give priority to a valid general duration  
+    const generalDuration = this.get('duration');
+    if (!isNone(generalDuration) && !Number.isNaN(Number(generalDuration)) && generalDuration > 0) {
+      return generalDuration;
     }
 
     // otherwise, set according to the state of showItems
@@ -326,7 +327,7 @@ export default Mixin.create({
         this.onAnimationComplete(animationEvent);
       }
     },
-  }
+  },
 
   /* -------------------- HELPERS ---------------------- */
   _cacheListItems () {

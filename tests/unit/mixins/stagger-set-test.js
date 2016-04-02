@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import StaggerListMixin from 'ember-stagger-swagger/mixins/stagger-list';
+import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 import { module, test } from 'qunit';
 
 
@@ -20,7 +20,7 @@ module('Unit | Mixin | stagger list');
 test('requiring a valid `staggerDirection`', function (assert) {
   assert.expect(3);
 
-  StaggerListObject = Ember.Object.extend(StaggerListMixin);
+  StaggerListObject = Ember.Object.extend(StaggerSetMixin);
 
   assert.throws(
     () => {
@@ -43,7 +43,7 @@ test('requiring a valid `staggerDirection`', function (assert) {
 test(`throwing an error when an invalid \`staggerInterval\` is provided`, function (assert) {
   assert.expect(4);
 
-  StaggerListObject = Ember.Object.extend(StaggerListMixin);
+  StaggerListObject = Ember.Object.extend(StaggerSetMixin);
 
   assert.throws(
     () => {
@@ -68,7 +68,7 @@ test(`throwing an error when an invalid \`staggerInterval\` is provided`, functi
 test('initializing a default `staggerInterval` of 32 ms if none is provided', function (assert) {
   assert.expect(1);
 
-  StaggerListObject = Ember.Object.extend(StaggerListMixin);
+  StaggerListObject = Ember.Object.extend(StaggerSetMixin);
   subject = StaggerListObject.create({ staggerDirection: STAGGER_DIRECTIONS.LEFT });
 
   expected = 32;

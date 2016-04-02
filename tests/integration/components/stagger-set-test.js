@@ -42,7 +42,7 @@ const ANIMATION_NAME_MAP = {
 let actual, expected;
 
 
-moduleForComponent('stagger-list', 'Integration | Component | stagger list', {
+moduleForComponent('stagger-set', 'Integration | Component | stagger set', {
   integration: true
 });
 
@@ -50,7 +50,7 @@ test('rendering', function(assert) {
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });
 
-  this.render(hbs`{{stagger-list}}`);
+  this.render(hbs`{{stagger-set}}`);
 
   expected = '';
   actual = getNode(this).textContent.trim();
@@ -58,9 +58,9 @@ test('rendering', function(assert) {
 
   // Template block usage:
   this.render(hbs`
-    {{#stagger-list}}
+    {{#stagger-set}}
       template block text
-    {{/stagger-list}}
+    {{/stagger-set}}
   `);
 
   expected = 'template block text';
@@ -75,9 +75,9 @@ test(`during didInsertElement: properly setting \`itemsHidden\` based
   this.set('showItems', true);
 
   this.render(hbs`
-    {{#stagger-list showItems=showItems}}
+    {{#stagger-set showItems=showItems}}
       template block text
-    {{/stagger-list}}
+    {{/stagger-set}}
   `);
 
   expected = false;
@@ -90,9 +90,9 @@ test(`during didInsertElement: properly setting \`itemsHidden\` based
   });
 
   this.render(hbs`
-    {{#stagger-list showItems=showItems}}
+    {{#stagger-set showItems=showItems}}
       template block text
-    {{/stagger-list}}
+    {{/stagger-set}}
   `);
 
   expected = true;
@@ -113,9 +113,9 @@ test(`toggling the element's animation class hooks when the
   this.set('dataDown', dataDown);
 
   this.render(hbs`
-    {{#stagger-list showItems=dataDown.showItems}}
+    {{#stagger-set showItems=dataDown.showItems}}
       template block text
-    {{/stagger-list}}
+    {{/stagger-set}}
   `);
 
   expected = false;
@@ -165,11 +165,11 @@ test(`mapping keyframes according to the \`staggerDirection\``, function (assert
   this.set('dataDown', dataDown);
 
   this.render(hbs`
-    {{#stagger-list staggerDirection=dataDown.staggerDirection showItems=dataDown.showItems}}
+    {{#stagger-set staggerDirection=dataDown.staggerDirection showItems=dataDown.showItems}}
       <li>Seattle</li>
       <li>New York City</li>
       <li>Boston</li>
-    {{/stagger-list}}
+    {{/stagger-set}}
   `);
 
   // no animation yet
