@@ -1,77 +1,134 @@
 import Ember from 'ember';
 import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 import { module, test } from 'qunit';
+import Constants from 'ember-stagger-swagger/constants/constants';
 
+const {
+  ANIMATION_DIRECTIONS,
+  ANIMATION_NAMES,
+  KEYFRAMES_MAP,
+  DEFAULTS,
+} = Constants;
 
-const STAGGER_DIRECTIONS = {
-  LEFT: 'left',
-  DOWN: 'down',
-  RIGHT: 'right',
-  UP: 'up',
+const minimalConfig = {
+  inDirection: ANIMATION_DIRECTIONS.LEFT,
+  inEffect: ANIMATION_NAMES.SLIDE_AND_FADE,
 };
 
 
-let StaggerListObject, subject;
+let StaggerSetObject, subject;
 let actual, expected;
 
 module('Unit | Mixin | stagger list');
 
-
-test('requiring a valid `staggerDirection`', function (assert) {
+test('requiring a valid `inDirection`', function (assert) {
   assert.expect(3);
+  StaggerSetObject = Ember.Object.extend(StaggerSetMixin);
 
-  StaggerListObject = Ember.Object.extend(StaggerSetMixin);
+  assert.throws(
+    () => { subject = StaggerSetObject.create({ inDirection: null }); },
+    /inDirection/,
+    'failing to specify a `inDirection` throws an error'
+  );
+
+  assert.throws(
+    () => { subject = StaggerSetObject.create({ inDirection: 'spiral' }); },
+    /inDirection/,
+    'specifying an invalid `inDirection` throws an error'
+  );
+
+  assert.ok(subject = StaggerSetObject.create(minimalConfig));
+});
+
+test('requiring a valid `inEffect`', function (assert) {
+  assert.expect(3);
+  StaggerSetObject = Ember.Object.extend(StaggerSetMixin);
 
   assert.throws(
     () => {
-      subject = StaggerListObject.create();
+      subject = StaggerSetObject.create({
+        inDirection: ANIMATION_DIRECTIONS.LEFT,
+        inEffect: null,
+      });
     },
-    'failing to specify a `staggerDirection` throws an error'
+    /inEffect/,
+    'failing to specify a `inEffect` throws an error'
   );
 
   assert.throws(
     () => {
-      subject = StaggerListObject.create({ staggerDirection: 'spiral' });
+      subject = StaggerSetObject.create({
+        inDirection: ANIMATION_DIRECTIONS.LEFT,
+        inEffect: 'supernova',
+      });
     },
-    'specifying an invalid `staggerDirection` throws an error'
+    'specifying an invalid `inEffect` throws an error'
   );
 
-  assert.ok(subject = StaggerListObject.create({ staggerDirection: STAGGER_DIRECTIONS.LEFT }));
+  assert.ok(subject = StaggerSetObject.create(minimalConfig));
 });
 
 
-test(`throwing an error when an invalid \`staggerInterval\` is provided`, function (assert) {
+test(`setting a proper default when an invalid \`staggerInterval\` is provided`, function (assert) {
+  assert.expect(5);
+
+  StaggerSetObject = Ember.Object.extend(StaggerSetMixin);
+
+  const valid = 90;
+  const invalidNaN = 'superfast';
+  const invalidNumber = -900;
+  const invalidNumber2 = 31;
+
+  subject = StaggerSetObject.create({...minimalConfig, staggerInterval: valid });
+  expected = valid;
+  actual = subject.get('staggerInterval');
+  assert.equal(actual, expected);
+
+  expected = DEFAULTS.STAGGER_INTERVAL_MS;
+  
+  subject = StaggerSetObject.create({...minimalConfig, staggerInterval: invalidNaN });
+  actual = subject.get('staggerInterval');
+  assert.equal(actual, expected);
+
+  subject = StaggerSetObject.create({...minimalConfig, staggerInterval: invalidNumber });
+  actual = subject.get('staggerInterval');
+  assert.equal(actual, expected);
+
+  subject = StaggerSetObject.create({...minimalConfig, staggerInterval: invalidNumber2 });
+  actual = subject.get('staggerInterval');
+  assert.equal(actual, expected);
+
+  subject = StaggerSetObject.create({...minimalConfig, staggerInterval: null });
+  actual = subject.get('staggerInterval');
+  assert.equal(actual, expected);
+});
+
+
+test(`setting a proper default when an invalid \`inDelay\` is provided`, function (assert) {
   assert.expect(4);
 
-  StaggerListObject = Ember.Object.extend(StaggerSetMixin);
+  StaggerSetObject = Ember.Object.extend(StaggerSetMixin);
 
-  assert.throws(
-    () => {
-      subject = StaggerListObject.create({ staggerInterval: -500, staggerDirection: STAGGER_DIRECTIONS.LEFT });
-    },
-    'specifying a negative or 0 staggerInterval throws an errror'
-  );
+  const valid = 90;
+  const invalidNaN = 'superfast';
+  const invalidNumber = -900;
 
-  assert.throws(
-    () => {
-      subject = StaggerListObject.create({ staggerInterval: 'superfast' });
-    },
-    'specifying a non-number-like staggerInterval throws an errror'
-  );
+  subject = StaggerSetObject.create({...minimalConfig, inDelay: valid });
+  expected = valid;
+  actual = subject.get('inDelay');
+  assert.equal(actual, expected);
 
-  assert.ok(subject = StaggerListObject.create({ staggerInterval: 42, staggerDirection: STAGGER_DIRECTIONS.LEFT }));
-  assert.ok(subject = StaggerListObject.create({ staggerInterval: '42', staggerDirection: STAGGER_DIRECTIONS.LEFT }));
+  expected = DEFAULTS.ANIMATION_DELAY_IN;
 
-});
+  subject = StaggerSetObject.create({...minimalConfig, inDelay: invalidNaN });
+  actual = subject.get('inDelay');
+  assert.equal(actual, expected);
 
+  subject = StaggerSetObject.create({...minimalConfig, inDelay: invalidNumber });
+  actual = subject.get('inDelay');
+  assert.equal(actual, expected);
 
-test('initializing a default `staggerInterval` of 32 ms if none is provided', function (assert) {
-  assert.expect(1);
-
-  StaggerListObject = Ember.Object.extend(StaggerSetMixin);
-  subject = StaggerListObject.create({ staggerDirection: STAGGER_DIRECTIONS.LEFT });
-
-  expected = 32;
-  actual = subject.get('staggerInterval');
+  subject = StaggerSetObject.create({...minimalConfig, inDelay: null });
+  actual = subject.get('inDelay');
   assert.equal(actual, expected);
 });

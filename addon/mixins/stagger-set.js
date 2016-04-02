@@ -8,6 +8,7 @@
 * element of the component's template block.
 */
 import Ember from 'ember';
+import Constants from 'ember-stagger-swagger/constants/constants';
 import getAnimationPrefix from 'ember-stagger-swagger/utils/get-animation-prefix';
 
 const {
@@ -23,103 +24,17 @@ const {
   notEmpty,
 } = computed;
 
+const {
+  DEFAULTS,
+  ANIMATION_DIRECTIONS,
+  ANIMATION_NAMES,
+  KEYFRAMES_MAP,
+} = Constants;
 
-const defaults = {
-
-  /**
-  * 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered
-  * but still-perceptively fluid motion.
-  * (see: https://en.wikipedia.org/wiki/Traditional_animation#.22Shooting_on_twos.22)
-  */
-  STAGGER_INTERVAL_MS: 32,
-
-  ANIMATION_DELAY_IN: 0,
-  ANIMATION_DELAY_OUT: 0,
-
-  ANIMATION_DURATION_IN: 500,
-  ANIMATION_DURATION_OUT: 500,
-
-  TIMING_FUNCTION_IN: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',  // ease-out-cubic
-  TIMING_FUNCTION_OUT: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
-};
-
-
+// TODO: Move to constants as well?
 const CLASS_NAMES = {
   untoggled: 'hasnt-entered',
   listItemCompletedInitialToggle: 'completed-initial-enter',
-};
-
-const ANIMATION_DIRECTIONS = {
-  LEFT: 'left',
-  DOWN: 'down',
-  RIGHT: 'right',
-  UP: 'up',
-};
-
-const ANIMATION_NAMES = {
-  SLIDE_AND_FADE: 'slideAndFade',
-  SLIDE: 'slide',
-  FADE: 'fade',
-  SCALE: 'scale',
-};
-
-const KEYFRAMES_MAP = {
-  [ANIMATION_DIRECTIONS.LEFT]: {
-    in: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromRight',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
-    },
-    out: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutLeft',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
-    },
-  },
-  [ANIMATION_DIRECTIONS.DOWN]: {
-    in: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromTop',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
-    },
-    out: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutDown',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutDown',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
-    },
-  },
-  [ANIMATION_DIRECTIONS.RIGHT]: {
-    in: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromLeft',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
-    },
-    out: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutRight',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutRight',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
-    },
-  },
-  [ANIMATION_DIRECTIONS.UP]: {
-    in: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideInFromBottom',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeIn',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleIn',
-    },
-    out: {
-      [ANIMATION_NAMES.SLIDE_AND_FADE]: '__EmberStaggerSwagger__SlideAndFadeOutUp',
-      [ANIMATION_NAMES.SLIDE]: '__EmberStaggerSwagger__SlideOutUp',
-      [ANIMATION_NAMES.FADE]: '__EmberStaggerSwagger__FadeOut',
-      [ANIMATION_NAMES.SCALE]: '__EmberStaggerSwagger__ScaleOut',
-    },
-  },
 };
 
 const warningOpts = { id: 'ember-stagger-swagger:stagger-set'};
@@ -238,7 +153,7 @@ export default Mixin.create({
   ),
 
   currentAnimationDuration: computed('duration', 'inDuration', 'outDuration', 'showItems', function computeDuration () {
-    // give priority to a valid general duration  
+    // give priority to a valid general duration
     const generalDuration = this.get('duration');
     if (!isNone(generalDuration) && !Number.isNaN(Number(generalDuration)) && generalDuration > 0) {
       return generalDuration;
@@ -430,37 +345,37 @@ export default Mixin.create({
 
     /* eslint-disable max-len */
     if (isNone(this.staggerInterval) || Number.isNaN(Number(this.staggerInterval)) || this.staggerInterval < 32) {
-      warn(`The stagger interval that you attempted to specify was invalid. Please use a numeric value greater than or equal to 32 (milliseconds). Defaulting to ${defaults.STAGGER_INTERVAL_MS} milliseconds`, null, warningOpts);
-      this.staggerInterval = defaults.STAGGER_INTERVAL_MS;
+      warn(`Invalid \`staggerInterval\`: ${this.staggerInterval}. Please use a numeric value greater than or equal to 32 (milliseconds). Defaulting to ${DEFAULTS.STAGGER_INTERVAL_MS} milliseconds`, null, warningOpts);
+      this.staggerInterval = DEFAULTS.STAGGER_INTERVAL_MS;
     }
 
     if (isNone(this.inDelay) || Number.isNaN(Number(this.inDelay)) || this.inDelay < 0) {
-      warn(`The \`inDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${defaults.ANIMATION_DELAY_IN}`, null, warningOpts);
-      this.inDelay = defaults.ANIMATION_DELAY_IN;
+      warn(`The \`inDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_IN}`, null, warningOpts);
+      this.inDelay = DEFAULTS.ANIMATION_DELAY_IN;
     }
 
     if (isNone(this.outDelay) || Number.isNaN(Number(this.outDelay)) || this.outDelay < 0) {
-      warn(`The \`outDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${defaults.ANIMATION_DELAY_OUT}`, null, warningOpts);
-      this.outDelay = defaults.ANIMATION_DELAY_IN;
+      warn(`The \`outDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_OUT}`, null, warningOpts);
+      this.outDelay = DEFAULTS.ANIMATION_DELAY_IN;
     }
 
     if (isNone(this.inDuration) || Number.isNaN(Number(this.inDuration)) || this.inDuration <= 0) {
-      warn(`The \`inDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${defaults.ANIMATION_DURATION_IN}`, null, warningOpts);
-      this.inDuration = defaults.ANIMATION_DURATION_IN;
+      warn(`The \`inDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_IN}`, null, warningOpts);
+      this.inDuration = DEFAULTS.ANIMATION_DURATION_IN;
     }
 
     if (isNone(this.outDuration) || Number.isNaN(Number(this.outDuration)) || this.outDuration <= 0) {
-      warn(`The \`outDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${defaults.ANIMATION_DURATION_OUT}`, null, warningOpts);
-      this.outDuration = defaults.ANIMATION_DURATION_OUT;
+      warn(`The \`outDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_OUT}`, null, warningOpts);
+      this.outDuration = DEFAULTS.ANIMATION_DURATION_OUT;
     }
     /* eslint-enable max-len */
 
     // Set a default timing functoin if none is provided, but don't warn
     if (isNone(this.inTimingFunc)) {
-      this.inTimingFunc = defaults.TIMING_FUNCTION_IN;
+      this.inTimingFunc = DEFAULTS.TIMING_FUNCTION_IN;
     }
     if (isNone(this.outTimingFunc)) {
-      this.outTimingFunc = defaults.TIMING_FUNCTION_OUT;
+      this.outTimingFunc = DEFAULTS.TIMING_FUNCTION_OUT;
     }
   },
 

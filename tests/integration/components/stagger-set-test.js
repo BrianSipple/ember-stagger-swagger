@@ -5,6 +5,7 @@ import getNode from '../../helpers/integration/get-node';
 
 const {
   run,
+  warn,
 } = Ember;
 
 const CLASS_NAMES = {
@@ -13,60 +14,38 @@ const CLASS_NAMES = {
   itemsCollapsing: 'items-collapsing',
 };
 
-const STAGGER_DIRECTIONS = {
-  LEFT: 'left',
-  DOWN: 'down',
-  RIGHT: 'right',
-  UP: 'up',
-};
+const {
+  ANIMATION_DIRECTIONS,
+  ANIMATION_NAMES,
+  KEYFRAMES_MAP,
+} = Constants;
 
-const ANIMATION_NAME_MAP = {
-  [STAGGER_DIRECTIONS.LEFT]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromRight',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutRight',
-  },
-  [STAGGER_DIRECTIONS.DOWN]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromTop',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutUp',
-  },
-  [STAGGER_DIRECTIONS.RIGHT]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromLeft',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutLeft',
-  },
-  [STAGGER_DIRECTIONS.UP]: {
-    in: '__EmberStaggerSwagger__SlideAndFadeInFromBottom',
-    out: '__EmberStaggerSwagger__SlideAndFadeOutDown',
-  },
-};
+
+function renderMinimalContent () {
+  this.render(hbs`
+    {{#stagger-set inDirection="left" inEffect="slideAndFade"}}
+      Seattle
+    {{/stagger-set}}
+  `);
+}
+
 
 let actual, expected;
-
 
 moduleForComponent('stagger-set', 'Integration | Component | stagger set', {
   integration: true
 });
 
-test('rendering', function(assert) {
+test('rendering block content', function(assert) {
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });
+  renderMinimalContent.call(this);
 
-  this.render(hbs`{{stagger-set}}`);
-
-  expected = '';
-  actual = getNode(this).textContent.trim();
-  assert.equal(actual, expected);
-
-  // Template block usage:
-  this.render(hbs`
-    {{#stagger-set}}
-      template block text
-    {{/stagger-set}}
-  `);
-
-  expected = 'template block text';
+  expected = 'Seattle';
   actual = getNode(this).textContent.trim();
   assert.equal(actual, expected);
 });
+
 
 
 test(`during didInsertElement: properly setting \`itemsHidden\` based
