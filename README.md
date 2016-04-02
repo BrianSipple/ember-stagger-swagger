@@ -201,3 +201,7 @@ Together, these hooks can provide more control over interactions with the compon
 * `ember build`
 
 For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+
+
+
+[demo]: http://www.sipple.io/ember-stagger-swagger-demo

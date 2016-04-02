@@ -1,14 +1,13 @@
 /**
-* STAGGERED LIST
+* stagger-set mixin
 *
 * A component mixin that renders list items by performing a staggered animation of their
-* entrance by listening to a "showItems" binding.
+* entrance/exit by listening to a "showItems" binding.
 *
-* NOTE: Right now, a "list item" is considered anything that's supplied as a direct child
+* A "list item" is considered anything that's supplied as a direct child
 * element of the component's template block.
 */
 import Ember from 'ember';
-import setElementStyleProperty from 'ember-stagger-swagger/utils/set-element-style-property';
 import getAnimationPrefix from 'ember-stagger-swagger/utils/get-animation-prefix';
 
 const {
@@ -48,9 +47,6 @@ const defaults = {
 const CLASS_NAMES = {
   untoggled: 'hasnt-entered',
   listItemCompletedInitialToggle: 'completed-initial-enter',
-  itemsHidden: 'items-hidden',
-  itemsShowing: 'items-showing',
-  itemsCollapsing: 'items-collapsing',
 };
 
 const ANIMATION_DIRECTIONS = {
@@ -130,7 +126,7 @@ const warningOpts = { id: 'ember-stagger-swagger:stagger-set'};
 
 export default Mixin.create({
 
-  classNames: ['_ember-stagger-swagger_stagger-list'],
+  classNames: ['__ember-stagger-swagger__stagger-set'],
   classNameBindings: [`hasListToggled::${CLASS_NAMES.untoggled}`],
 
   /* -------------------------------------------------------------------- *
@@ -174,9 +170,9 @@ export default Mixin.create({
   * ----------------------- /API ------------------------ *
   * -------------------------------------------------------------------- */
 
+
   isAnimating: false,
   hasListToggled: false,
-
 
   /**
   * Callback (to be initialized) for our animationstart event listener
@@ -188,13 +184,11 @@ export default Mixin.create({
   */
   _onStaggerComplete: null,
 
-
   /**
   * Callback (to be initialized) for caching the DOM nodes of our child elements
   * when they get added to the DOM
   */
   _onChildElementsInserted: null,
-
   _childInsertionListener: null,
 
   /**
@@ -207,7 +201,6 @@ export default Mixin.create({
   * modify DOM element style properties.
   */
   _animationPrefix: null,
-
 
   hasItemsToAnimate: notEmpty('_listItemElems'),
 
@@ -223,22 +216,30 @@ export default Mixin.create({
     return this.get('customOutEffect') || KEYFRAMES_MAP[this.get('outDirection')].out[this.get('outEffect')];
   }),
 
+  needsToEnterAfterInit: computed('enterOnRender', 'hasListToggled', 'isReadyToAnimate', function needsInitialRender () {
+    return (
+      !this.get('hasListToggled') &&
+      this.get('enterOnRender') &&
+      this.get('isReadyToAnimate')
+    );
+  }),
+
   currentAnimationName: computed(
     '_inAnimationName',
     '_outAnimationName',
     'showItems',
-    'needsToAnimateAfterInit',
+    'needsToEnterAfterInit',
     function currentAnimationName() {
-      return ( this.get('showItems') || this.get('needsToAnimateAfterInit') ) ?
-      this.get('_inAnimationName')
-      :
-      this.get('_outAnimationName');
+      return ( this.get('showItems') || this.get('needsToEnterAfterInit') ) ?
+        this.get('_inAnimationName')
+        :
+        this.get('_outAnimationName');
     }
   ),
 
   currentAnimationDuration: computed('duration', 'inDuration', 'outDuration', 'showItems', function computeDuration () {
     // give priority to a specified in/out duration
-    if (this.get('duration')) {
+    if (!isNone(this.get('duration'))) {
       return this.get('duration');
     }
 
@@ -251,14 +252,7 @@ export default Mixin.create({
     return this.get('showItems') ? this.get('inTimingFunc') : this.get('outTimingFunc');
   }),
 
-  needsToAnimateAfterInit: computed('enterOnRender', 'hasListToggled', 'isReadyToAnimate', function needsInitialRender () {
-    return (
-      !this.get('hasListToggled') &&
-      this.get('enterOnRender') &&
-      this.get('isReadyToAnimate')
-    );
-  }),
-
+  /* -------------------- LIFECYCLE HOOKS ---------------------- */
   init () {
     this._super(...arguments);
 
@@ -287,6 +281,7 @@ export default Mixin.create({
   */
   didUpdateAttrs (attrData) {
     this._super(...arguments);
+
     const oldShowItems = (
       typeof attrData.oldAttrs.showItems.value !== 'undefined' &&
       attrData.oldAttrs.showItems.value
@@ -317,8 +312,23 @@ export default Mixin.create({
     this._childInsertionListener.disconnect();
   },
 
+  /* -------------------- ACTIONS ---------------------- */
+  actions: {
 
+    broadcastAnimationStart(animationEvent) {
+      if (typeof this.onAnimationStart === 'function') {
+        this.onAnimationStart(animationEvent);
+      }
+    },
 
+    broadcastAnimationComplete(animationEvent) {
+      if (typeof this.onAnimationComplete === 'function') {
+        this.onAnimationComplete(animationEvent);
+      }
+    },
+  }
+
+  /* -------------------- HELPERS ---------------------- */
   _cacheListItems () {
     this.set('_listItemElems', Array.from(this.element.children));
   },
@@ -343,7 +353,6 @@ export default Mixin.create({
     * that will fire immediately after the animation and
     * update `hasListToggled` (if necessary), `isAnimating`, and
     * tell our `broadcastAnimationComplete` action to fire
-    *
     */
     this._onStaggerComplete = function onStaggerComplete (event) {
 
@@ -373,7 +382,7 @@ export default Mixin.create({
     this._cacheListItems();
     this._cacheAnimationPrefix();
     this._prepareItemsInDOM();
-    if (this.get('needsToAnimateAfterInit')) {
+    if (this.get('needsToEnterAfterInit')) {
       run.scheduleOnce('afterRender', this, '_triggerAnimation');
     }
   },
@@ -489,8 +498,6 @@ export default Mixin.create({
     /* eslint-enable max-len */
   },
 
-
-
   _setAnimationValuesForItems (applyName = false) {
 
     // setting an animation name is what we use to trigger the animation, so only set if asked for
@@ -515,18 +522,4 @@ export default Mixin.create({
     this._setAnimationValuesForItems(true);
   },
 
-  actions: {
-
-    broadcastAnimationStart(animationEvent) {
-      if (typeof this.onAnimationStart === 'function') {
-        this.onAnimationStart(animationEvent);
-      }
-    },
-
-    broadcastAnimationComplete(animationEvent) {
-      if (typeof this.onAnimationComplete === 'function') {
-        this.onAnimationComplete(animationEvent);
-      }
-    },
-  }
 });

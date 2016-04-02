@@ -1,6 +1,6 @@
 @import './_keyframes.css';
 
-._ember-stagger-swagger_stagger-list {
+.__ember-stagger-swagger__stagger-set {
 
   /* TODO: JS all the things? */
   &.hasnt-entered {
@@ -11,5 +11,5 @@
       }
     }
   }
-  
+
 }
