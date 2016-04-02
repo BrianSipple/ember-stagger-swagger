@@ -1,12 +1,12 @@
 /**
- * STAGGERED LIST
- *
- * A component mixin that renders list items by performing a staggered animation of their
- * entrance by listening to a "showItems" binding.
- *
- * NOTE: Right now, a "list item" is considered anything that's supplied as a direct child
- * element of the component's template block.
- */
+* STAGGERED LIST
+*
+* A component mixin that renders list items by performing a staggered animation of their
+* entrance by listening to a "showItems" binding.
+*
+* NOTE: Right now, a "list item" is considered anything that's supplied as a direct child
+* element of the component's template block.
+*/
 import Ember from 'ember';
 import setElementStyleProperty from 'ember-stagger-swagger/utils/set-element-style-property';
 import getAnimationPrefix from 'ember-stagger-swagger/utils/get-animation-prefix';
@@ -17,6 +17,7 @@ const {
   run,
   warn,
   assert,
+  isNone,
 } = Ember;
 
 const {
@@ -27,18 +28,20 @@ const {
 const defaults = {
 
   /**
-   * 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered
-   * but still-perceptively fluid motion.
-   * (see: https://en.wikipedia.org/wiki/Traditional_animation#.22Shooting_on_twos.22)
-   */
-  STAGGER_INTERVAL: 32,
+  * 2 frames per item (1 frame @ 60fps ~= 16ms) creates a noticeably staggered
+  * but still-perceptively fluid motion.
+  * (see: https://en.wikipedia.org/wiki/Traditional_animation#.22Shooting_on_twos.22)
+  */
+  STAGGER_INTERVAL_MS: 32,
 
-  ANIMATION_DELAY: 0,
+  ANIMATION_DELAY_IN: 0,
+  ANIMATION_DELAY_OUT: 0,
 
-  TOTAL_DURATION_MS: 500,
+  ANIMATION_DURATION_IN: 500,
+  ANIMATION_DURATION_OUT: 500,
 
-  IN_TIMING_FUNCTION: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',  // ease-out-cubic
-  OUT_TIMING_FUNCTION: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
+  TIMING_FUNCTION_IN: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',  // ease-out-cubic
+  TIMING_FUNCTION_OUT: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',  // ease-in-cubic
 };
 
 
@@ -123,96 +126,86 @@ const KEYFRAMES_MAP = {
   },
 };
 
+const warningOpts = { id: 'ember-stagger-swagger:stagger-set'};
 
 export default Mixin.create({
 
   classNames: ['_ember-stagger-swagger_stagger-list'],
   classNameBindings: [`hasListToggled::${CLASS_NAMES.untoggled}`],
 
-  /**
-   * -------------------------------------------------------------------- *
-   * ----------------------- API ------------------------ *
-   * -------------------------------------------------------------------- *
-   */
-
-  /**
-   * Flag for manually triggering either the show or hide animation
-   *
-   * By default, the list items will animate in on render, but
-   * but this allows the user to have full toggle control if they want it.
-   */
-  showItems: true,
-
-  /* trigger the entrance animation when this element is inserted into the DOM */
-  enterOnRender: true,  // TODO: Support
-
-
-  /* MILLESECONDS */
-  staggerInterval: null,
-
-  /* MILLESECONDS */
-  animationDelay: null,
-
-  // TODO: Support
-  // inDelay: null,
-  // outDelay: null,
-
+  /* -------------------------------------------------------------------- *
+  * ----------------------- API ------------------------ *
+  * -------------------------------------------------------------------- */
   inDirection: null,
   outDirection: null,
-
   inEffect: null,
   outEffect: null,
   customInEffect: null,
   customOutEffect: null,
 
+  /* trigger the entrance animation when this element is inserted into the DOM */
+  enterOnRender: true,
+
+  /**
+  * Flag for manually triggering either the show or hide animation
+  *
+  * By default, the list items will animate in on render, but
+  * but this allows the user to have full toggle control if they want it.
+  */
+  showItems: true,
+
+  /* MILLESECONDS */
+  staggerInterval: null,
+
+  /* MILLESECONDS */
+  inDelay: null,
+  outDelay: null,
 
   /* Timing Function */
   inTimingFunc: null,
   outTimingFunc: null,
   timingFunc: null, // single timing function for both in and out
 
-  /* Duration (milleseconds) */
+  /* Duration (milliseconds) */
   inDuration: 0,
   outDuration: 0,
-  duration: 0,  // single duration for both in and out
-  /**
-   * -------------------------------------------------------------------- *
-   * ----------------------- /API ------------------------ *
-   * -------------------------------------------------------------------- *
-   */
+  duration: 0,  // convinience option for a single in/out duration
+  /* -------------------------------------------------------------------- *
+  * ----------------------- /API ------------------------ *
+  * -------------------------------------------------------------------- */
 
   isAnimating: false,
   hasListToggled: false,
 
 
   /**
-   * Callback (to be initialized) for our animationstart event listener
-   */
+  * Callback (to be initialized) for our animationstart event listener
+  */
   _onStaggerStart: null,
 
   /**
-   * Callback (to be initialized) for our animationend event listener
-   */
+  * Callback (to be initialized) for our animationend event listener
+  */
   _onStaggerComplete: null,
 
 
   /**
-   * Callback (to be initialized) for caching the DOM nodes of our child elements
-   * when they get added to the DOM
-   */
+  * Callback (to be initialized) for caching the DOM nodes of our child elements
+  * when they get added to the DOM
+  */
   _onChildElementsInserted: null,
 
   _childInsertionListener: null,
 
   /**
-   * Array of cached "list item" elements to cache upon insertion
-   */
+  * Array of cached "list item" elements to cache upon insertion
+  */
   _listItemElems: null,
 
   /**
-   * We'll be caching the animation prefix (if any) that's needed to
-   * modify DOM element style properties.
-   */
+  * We'll be caching the animation prefix (if any) that's needed to
+  * modify DOM element style properties.
+  */
   _animationPrefix: null,
 
 
@@ -237,9 +230,9 @@ export default Mixin.create({
     'needsToAnimateAfterInit',
     function currentAnimationName() {
       return ( this.get('showItems') || this.get('needsToAnimateAfterInit') ) ?
-        this.get('_inAnimationName')
-        :
-        this.get('_outAnimationName');
+      this.get('_inAnimationName')
+      :
+      this.get('_outAnimationName');
     }
   ),
 
@@ -250,18 +243,10 @@ export default Mixin.create({
     }
 
     // otherwise, set according to the state of showItems
-    return this.get('showItems') ?
-      this.get('inDuration') || defaults.TOTAL_DURATION_MS
-      :
-      this.get('outDuration') || defaults.TOTAL_DURATION_MS;
+    return this.get('showItems') ? this.get('inDuration') : this.get('outDuration');
   }),
 
-  currentAnimationTimingFunction: computed('inTimingFunc', 'outTimingFunc', 'timingFunc', 'showItems', function computeCurrentTimingFunction () {
-    // give priority to a specified in/out duration
-    if (this.get('timingFunc')) {
-      return this.get('timingFunc');
-    }
-
+  currentAnimationTimingFunction: computed('inTimingFunc', 'outTimingFunc', 'showItems', function computeCurrentTimingFunction () {
     // otherwise, set according to the state of showItems
     return this.get('showItems') ? this.get('inTimingFunc') : this.get('outTimingFunc');
   }),
@@ -278,8 +263,7 @@ export default Mixin.create({
     this._super(...arguments);
 
     this._resolveInitialTimingAttrs();
-    this._resolveInitialStaggerDirections();
-    this._resolveInitialTimingFunctions();
+    this._resolveInitialEffectAttrs();
   },
 
 
@@ -299,8 +283,8 @@ export default Mixin.create({
 
 
   /**
-   * Trigger the staggering animation when something on the outside updates `showItems`
-   */
+  * Trigger the staggering animation when something on the outside updates `showItems`
+  */
   didUpdateAttrs (attrData) {
     this._super(...arguments);
     const oldShowItems = (
@@ -352,15 +336,15 @@ export default Mixin.create({
     }.bind(this);
 
     /**
-     * AnimationEvent listener for the `animationend` event fired by each
-     * child item.
-     *
-     * If the event corresponds to the last item, we'll trigger a run loop call
-     * that will fire immediately after the animation and
-     * update `hasListToggled` (if necessary), `isAnimating`, and
-     * tell our `broadcastAnimationComplete` action to fire
-     *
-     */
+    * AnimationEvent listener for the `animationend` event fired by each
+    * child item.
+    *
+    * If the event corresponds to the last item, we'll trigger a run loop call
+    * that will fire immediately after the animation and
+    * update `hasListToggled` (if necessary), `isAnimating`, and
+    * tell our `broadcastAnimationComplete` action to fire
+    *
+    */
     this._onStaggerComplete = function onStaggerComplete (event) {
 
       // only update the DOM after we've finished animating all items
@@ -391,7 +375,6 @@ export default Mixin.create({
     this._prepareItemsInDOM();
     if (this.get('needsToAnimateAfterInit')) {
       run.scheduleOnce('afterRender', this, '_triggerAnimation');
-      //this.set('_needsToAnimateAfterInit', true);
     }
   },
 
@@ -404,10 +387,10 @@ export default Mixin.create({
   },
 
   /**
-   * For components whose child elements are asynchronously rendered,
-   * we can listen for the completion of such rendering and cache our
-   * list items then.
-   */
+  * For components whose child elements are asynchronously rendered,
+  * we can listen for the completion of such rendering and cache our
+  * list items then.
+  */
   _initChildInsertionListener () {
     this._childInsertionListener = new MutationObserver(function childInsertionListener (mutations) {
       this._onChildElementsInserted();
@@ -428,57 +411,84 @@ export default Mixin.create({
   },
 
 
+  /**
+  * helper function called on init that ensures we're wired up
+  * with acceptable timing properties, PROVIDING WARNINGS when
+  * the user specified something invalid
+  */
   _resolveInitialTimingAttrs () {
-    if (!this.staggerInterval) {
-      this.staggerInterval = defaults.STAGGER_INTERVAL;
 
-    } else {
-
-      /* eslint-disable max-len */
-      warn(
-        `The stagger interval that you attempted to specify was invalid. Please use a numeric value greater than 0. Defaulting to ${defaults.STAGGER_INTERVAL}`,
-        !Number.isNaN(Number(this.staggerInterval)) && this.staggerInterval > 0
-      );
-      /* eslint-enable max-len */
+    /* eslint-disable max-len */
+    if (isNone(this.staggerInterval) || Number.isNaN(Number(this.staggerInterval)) || this.staggerInterval < 32) {
+      warn(`The stagger interval that you attempted to specify was invalid. Please use a numeric value greater than or equal to 32 (milliseconds). Defaulting to ${defaults.STAGGER_INTERVAL_MS} milliseconds`, null, warningOpts);
+      this.staggerInterval = defaults.STAGGER_INTERVAL_MS;
     }
 
-    if (!this.animationDelay) {
-      this.animationDelay = defaults.ANIMATION_DELAY;
+    if (isNone(this.inDelay) || Number.isNaN(Number(this.inDelay)) || this.inDelay < 0) {
+      warn(`The \`inDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${defaults.ANIMATION_DELAY_IN}`, null, warningOpts);
+      this.inDelay = defaults.ANIMATION_DELAY_IN;
+    }
 
-    } else {
+    if (isNone(this.outDelay) || Number.isNaN(Number(this.outDelay)) || this.outDelay < 0) {
+      warn(`The \`outDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${defaults.ANIMATION_DELAY_OUT}`, null, warningOpts);
+      this.outDelay = defaults.ANIMATION_DELAY_IN;
+    }
 
-      /* eslint-disable max-len */
-      warn(
-        `The initial delay that you attempted to specify was invalid. Please use a numeric value. Defaulting to ${defaults.ANIMATION_DELAY}`,
-        !Number.isNaN(Number(this.staggerInterval))
-      );
-      /* eslint-enable max-len */
+    if (isNone(this.inDuration) || Number.isNaN(Number(this.inDuration)) || this.inDuration <= 0) {
+      warn(`The \`inDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${defaults.ANIMATION_DURATION_IN}`, null, warningOpts);
+      this.inDuration = defaults.ANIMATION_DURATION_IN;
+    }
+
+    if (isNone(this.outDuration) || Number.isNaN(Number(this.outDuration)) || this.outDuration <= 0) {
+      warn(`The \`outDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${defaults.ANIMATION_DURATION_OUT}`, null, warningOpts);
+      this.outDuration = defaults.ANIMATION_DURATION_OUT;
+    }
+    /* eslint-enable max-len */
+
+    // Set a default timing functoin if none is provided, but don't warn
+    if (isNone(this.inTimingFunc)) {
+      this.inTimingFunc = defaults.TIMING_FUNCTION_IN;
+    }
+    if (isNone(this.outTimingFunc)) {
+      this.outTimingFunc = defaults.TIMING_FUNCTION_OUT;
     }
   },
 
-  _resolveInitialStaggerDirections () {
-    // enforce inDirection
+  /**
+  * helper function called on init that ensures we're wired up
+  * with acceptable aniamation effect properties, THROWING ERRORS when
+  * required attributes are invalid and warning when optional attributes
+  * are set but invalid.
+  */
+  _resolveInitialEffectAttrs () {
     assert(
-      'stagger-list must have a valid `inDirection`',
-      !!this.inDirection && !!KEYFRAMES_MAP[this.inDirection]
+      `stagger-set must have a valid \`inDirection\``,  // TODO: Link to docs
+      !isNone(this.inDirection) && !!KEYFRAMES_MAP[this.inDirection]
+    );
+    assert(
+      `stagger-set must have a valid \`inEffect\``,  // TODO: Link to docs
+      !isNone(this.inEffect) && !!KEYFRAMES_MAP[this.inDirection].in[this.inEffect]
     );
 
-    // if not set, set the default outDirection to the continuation of the inDirection
-    if (!this.outDirection) {
+    /* eslint-disable max-len */
+    if (isNone(this.outDirection)) {
       this.outDirection = this.inDirection;
 
     } else if (!KEYFRAMES_MAP[this.outDirection]) {
-      warn(`invalid \`outDirection\`. Defaulting to the continuation of \`inDirection\`
-        https://https://github.com/BrianSipple/ember-stagger-swagger#usage`
-      );
+      warn(`The \`outDuration\` that you attempted to specify was invalid. Defaulting to ${this.inDirection}`, null, warningOpts);
       this.outDirection = this.inDirection;
     }
+
+    if (isNone(this.outEffect)) {
+      this.outEffect = this.inEffect;
+
+    } else if (!!KEYFRAMES_MAP[this.outDirection].out[this.outEffect]) {
+      warn(`The \`outEffect\` that you attempted to specify was invalid. Defaulting to ${this.inEffect}`, null, warningOpts);
+      this.outEffect = this.inEffect;
+    }
+    /* eslint-enable max-len */
   },
 
-  _resolveInitialTimingFunctions () {
-    this.inTimingFunc = this.inTimingFunc || defaults.IN_TIMING_FUNCTION;
-    this.outTimingFunc = this.outTimingFunc || defaults.OUT_TIMING_FUNCTION;
-  },
 
 
   _setAnimationValuesForItems (applyName = false) {

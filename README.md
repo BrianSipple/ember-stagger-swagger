@@ -105,15 +105,15 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
   * _description_: The [animation-timing-function](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timing-function) applied to each item in the set when it's animating in.
   * _required_: no
   * _default_: `cubic-bezier(0.215, 0.610, 0.355, 1.000)` (AKA ["ease-out-cubic"](http://easings.net/#easeOutCubic))
-  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function).
+  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this property is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
 
 
 ##### <a name="api-outTimingFunc"></a> `outTimingFunc`  
   * _description_: The [animation-timing-function](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timing-function) applied to each item in the set when it's animating out.
   * _required_: no
   * _default_: `cubic-bezier(0.55, 0.055, 0.675, 0.19)` (AKA ["ease-in-cubic"](http://easings.net/#easeInCubic))
-  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function).
-
+  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this property is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
+  
 ##### <a name="api-inDuration"></a> `inDuration`  
   * _description_: The duration (in milliseconds) that *a single item* will take when animating in.
   * _required_: no
