@@ -2,7 +2,9 @@
 
 *GPU-only stagger animation for Ember Components*
 
-See the demo [here](demo-link)
+![](http://33.media.tumblr.com/29addca2c908d96a071932761ffd177a/tumblr_nstg1jgKcg1uruo10o1_500.gif)
+
+See the demo [here](#demo).
 
 
 ## Installation
