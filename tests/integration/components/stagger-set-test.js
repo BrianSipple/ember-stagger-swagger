@@ -99,60 +99,6 @@ skip(`broadcasting animation start and animation completion`, function (assert) 
   });
 });
 
-// test('hiding items from the view if initialized with `showItems` set to `false`', function (assert) {
-//
-//   dataDown = DataDown.create({ showItems: false });
-//   this.set('dataDown', dataDown);
-//
-//   this.render(hbs`
-//     {{#stagger-set showItems=dataDown.showItems inEffect=dataDown.inEffect inDirection=dataDown.inDirection}}
-//       <li>Seattle</li>
-//       <li>New York City</li>
-//       <li>Boston</li>
-//     {{/stagger-set}}
-//   `);
-//
-//   expected = true;
-//   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     set(dataDown, 'showItems', true);
-//   });
-//
-//   this.render(hbs`
-//     {{#stagger-set showItems=dataDown.showItems inEffect=dataDown.inEffect inDirection=dataDown.inDirection}}
-//       <li>Seattle</li>
-//       <li>New York City</li>
-//       <li>Boston</li>
-//     {{/stagger-set}}
-//   `);
-//
-//   expected = false;
-//   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
-//   assert.equal(actual, expected);
-//
-//
-//   // return wait()
-//   //   .then(() => {
-//   //     expected = false;
-//   //     actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
-//   //     assert.equal(actual, expected);
-//   //   });
-// });
-
-
-//
-//   run(() => {
-//     set(dataDown, 'showItems', true);
-//   });
-//
-//   expected = true;
-//   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
-//   assert.equal(actual, expected);
-// });
-
-
 
 test(`toggling the element's animation name when the
   value of the \`showItems\` attribute changes after
