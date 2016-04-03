@@ -1,6 +1,6 @@
 {
   "name": "ember-stagger-swagger",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
     "doc": "doc",
