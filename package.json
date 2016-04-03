@@ -1,7 +1,7 @@
 {
   "name": "ember-stagger-swagger",
   "version": "1.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "GPU-only stagger animation for Ember Components",
   "directories": {
     "doc": "doc",
     "test": "tests"
