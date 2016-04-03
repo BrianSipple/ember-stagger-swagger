@@ -1,6 +1,6 @@
 {
   "name": "ember-stagger-swagger",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
     "doc": "doc",
@@ -65,6 +65,7 @@
     "ember-cli-htmlbars": "^1.0.1"
   },
   "ember-addon": {
-    "configPath": "tests/dummy/config"
+    "configPath": "tests/dummy/config",
+    "demoURL": "http://www.sipple.io/ember-stagger-swagger-demo/"
   }
 }

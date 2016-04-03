@@ -1,5 +1,7 @@
 # ember-stagger-swagger
 
+[![npm version](https://badge.fury.io/js/ember-stagger-swagger.svg)](https://badge.fury.io/js/ember-stagger-swagger) [![Build Status](https://travis-ci.org/BrianSipple/ember-stagger-swagger.svg?branch=master)](https://travis-ci.org/BrianSipple/ember-stagger-swagger) [![Ember Observer Score](http://emberobserver.com/badges/ember-stagger-swagger.svg)](http://emberobserver.com/addons/ember-stagger-swagger) [![Code Climate](https://codeclimate.com/github/BrianSipple/ember-stagger-swagger/badges/gpa.svg)](https://codeclimate.com/github/BrianSipple/ember-stagger-swagger)
+
 *GPU-only stagger animation for Ember Components*
 
 ![](http://33.media.tumblr.com/29addca2c908d96a071932761ffd177a/tumblr_nstg1jgKcg1uruo10o1_500.gif)
@@ -154,14 +156,9 @@ Furthermore, because the keyframes for the built-in effects of `slide` and `slid
 The [stagger-set "list items" demo](#demo) is an example of how this would appear.
 
 #### Creating Animation Effects
-A `stagger-set` component has only 2 required arguments: `inDirection` and `inEffect`.
+By default, a `stagger-list` component will attempt to map the keywords provided for `inEffect` or `outEffect` to one of its [built-in keyframes](/app/styles/_keyframes.css).
 
-* Stagger directions
-
-* Effect Types
-
-* Custom Keyframes
-
+However, you're free to implement your own keyframes and have them called instead. Just define them in your stylesheets as you would normally, and then pass the keyframe name to a `stagger-list` as a string argument for either `customInEffect` or `customOutEffect`. When these attributes are defined, `stagger-list` will always set them on the `animation-name` property of its child elements' style definition at the appropriate time. 
 
 ## Action Hooks
 
@@ -210,4 +207,4 @@ For more information on using ember-cli, visit [http://www.ember-cli.com/](http:
 
 
 
-[demo]: http://www.sipple.io/ember-stagger-swagger-demo
+[demo]: http://www.sipple.io/ember-stagger-swagger-demo/
