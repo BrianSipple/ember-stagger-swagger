@@ -6,7 +6,7 @@
 
 ![](http://33.media.tumblr.com/29addca2c908d96a071932761ffd177a/tumblr_nstg1jgKcg1uruo10o1_500.gif)
 
-See the demo [here](#demo).
+See the demo [here][demo].
 
 
 ## Installation
@@ -55,13 +55,13 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 ##### <a name="api-inEffect"></a> `inEffect`  
   * _description_: A recognized animation effect applied to each list item when it's animating in.
   * _required_: *yes*
-  * _constraints_: A string keyword matching either `'slideAndFade'`, `'slide'`, `'fade'`, or `'scale'` (see the [demo](#demo) for a preview of each).
+  * _constraints_: A string keyword matching either `'slideAndFade'`, `'slide'`, `'fade'`, or `'scale'` (see the [demo][demo] for a preview of each).
 
 ##### <a name="api-outEffect"></a> `outEffect`  
   * _description_: A recognized animation effect applied to each list item when it's animating in.
   * _required_: no
   * _default_: the provided `inEffect`
-  * _constraints_: A string keyword matching either `'slideAndFade'`, `'slide'`, `'fade'`, or `'scale'` (see the [demo](#demo) for a preview of each).
+  * _constraints_: A string keyword matching either `'slideAndFade'`, `'slide'`, `'fade'`, or `'scale'` (see the [demo][demo] for a preview of each).
 
 ##### <a name="api-customInEffect"></a> `customInEffect`  
   * _description_: An [animation name](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-name) matching a [CSS animation keyframe](https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes) that you have defined in your project. If specified alongside an `inEffect`, this name will take precedence. This can be used to create your own effects and integrate them with `stagger-swagger`'s built-in functionality.
@@ -153,12 +153,12 @@ Because the DOM elements of Ember components are, by default, `<div>`s, and beca
 
 Furthermore, because the keyframes for the built-in effects of `slide` and `slideAndFade` define transforms to bring their element in or out of its container's visible bounds (e.g., `transform: translate3d(-100, 0, 0)` at the 100%-stop of a left slide), it may well be useful to restrict overflow on the top-level component's element so that the children disappear when they're outside of said bounds.
 
-The [stagger-set "list items" demo](#demo) is an example of how this would appear.
+The [stagger-set "list items" demo][demo] is an example of how this would appear.
 
 #### Creating Animation Effects
 By default, a `stagger-list` component will attempt to map the keywords provided for `inEffect` or `outEffect` to one of its [built-in keyframes](/app/styles/_keyframes.css).
 
-However, you're free to implement your own keyframes and have them called instead. Just define them in your stylesheets as you would normally, and then pass the keyframe name to a `stagger-list` as a string argument for either `customInEffect` or `customOutEffect`. When these attributes are defined, `stagger-list` will always set them on the `animation-name` property of its child elements' style definition at the appropriate time. 
+However, you're free to implement your own keyframes and have them called instead. Just define them in your stylesheets as you would normally, and then pass the keyframe name to a `stagger-list` as a string argument for either `customInEffect` or `customOutEffect`. When these attributes are defined, `stagger-list` will always set them on the `animation-name` property of its child elements' style definition at the appropriate time.
 
 ## Action Hooks
 
