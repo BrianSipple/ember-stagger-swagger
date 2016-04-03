@@ -78,9 +78,9 @@ export default Mixin.create({
   timingFunc: null, // single timing function for both in and out
 
   /* Duration (milliseconds) */
-  inDuration: 0,
-  outDuration: 0,
-  duration: 0,  // convinience option for a single in/out duration
+  inDuration: null,
+  outDuration: null,
+  duration: null,  // convinience option for a single in/out duration
   /* -------------------------------------------------------------------- *
   * ----------------------- /API ------------------------ *
   * -------------------------------------------------------------------- */
@@ -350,22 +350,22 @@ export default Mixin.create({
     }
 
     if (isNone(this.inDelay) || Number.isNaN(Number(this.inDelay)) || this.inDelay < 0) {
-      warn(`The \`inDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_IN}`, null, warningOpts);
+      warn(`Invalid \`inDelay\`: ${this.inDelay}. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_IN}`, null, warningOpts);
       this.inDelay = DEFAULTS.ANIMATION_DELAY_IN;
     }
 
     if (isNone(this.outDelay) || Number.isNaN(Number(this.outDelay)) || this.outDelay < 0) {
-      warn(`The \`outDelay\` that you attempted to specify was invalid. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_OUT}`, null, warningOpts);
+      warn(`Invalid \`outDelay\`: ${this.outDelay}. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_OUT}`, null, warningOpts);
       this.outDelay = DEFAULTS.ANIMATION_DELAY_IN;
     }
 
     if (isNone(this.inDuration) || Number.isNaN(Number(this.inDuration)) || this.inDuration <= 0) {
-      warn(`The \`inDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_IN}`, null, warningOpts);
+      warn(`Invalid \`inDuration\`: ${this.inDuration}. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_IN}`, null, warningOpts);
       this.inDuration = DEFAULTS.ANIMATION_DURATION_IN;
     }
 
     if (isNone(this.outDuration) || Number.isNaN(Number(this.outDuration)) || this.outDuration <= 0) {
-      warn(`The \`outDuration\` that you attempted to specify was invalid. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_OUT}`, null, warningOpts);
+      warn(`Invalid \`outDuration\`: ${this.outDuration}. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_OUT}`, null, warningOpts);
       this.outDuration = DEFAULTS.ANIMATION_DURATION_OUT;
     }
     /* eslint-enable max-len */
@@ -400,7 +400,7 @@ export default Mixin.create({
       this.outDirection = this.inDirection;
 
     } else if (!KEYFRAMES_MAP[this.outDirection]) {
-      warn(`The \`outDuration\` that you attempted to specify was invalid. Defaulting to ${this.inDirection}`, null, warningOpts);
+      warn(`Invalid \`outDirection\`: ${this.outDirection}. Defaulting to ${this.inDirection}`, null, warningOpts);
       this.outDirection = this.inDirection;
     }
 
@@ -408,7 +408,7 @@ export default Mixin.create({
       this.outEffect = this.inEffect;
 
     } else if (!!KEYFRAMES_MAP[this.outDirection].out[this.outEffect]) {
-      warn(`The \`outEffect\` that you attempted to specify was invalid. Defaulting to ${this.inEffect}`, null, warningOpts);
+      warn(`Invalid \`outEffect\`: ${this.outEffect}. Defaulting to ${this.inEffect}`, null, warningOpts);
       this.outEffect = this.inEffect;
     }
     /* eslint-enable max-len */
