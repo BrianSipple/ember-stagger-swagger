@@ -126,10 +126,11 @@ export default Mixin.create({
     return this.get('customOutEffect') || KEYFRAMES_MAP[this.get('outDirection')].out[this.get('outEffect')];
   }),
 
-  needsToEnterAfterInit: computed('enterOnRender', 'hasListToggled', 'isReadyToAnimate', function needsInitialRender () {
+  needsToEnterAfterInit: computed('enterOnRender', 'hasListToggled', 'isReadyToAnimate', 'showItems', function needsInitialRender () {
     return (
       !this.get('hasListToggled') &&
       this.get('enterOnRender') &&
+      this.get('showItems') &&
       this.get('isReadyToAnimate')
     );
   }),
@@ -274,7 +275,6 @@ export default Mixin.create({
     * tell our `broadcastAnimationComplete` action to fire
     */
     this._onStaggerComplete = function onStaggerComplete (event) {
-
       // only update the DOM after we've finished animating all items
       const hasListToggled = this.get('hasListToggled');
       const lastListItemElem = this._listItemElems[this._listItemElems.length - 1];
@@ -285,10 +285,10 @@ export default Mixin.create({
       }
 
       if (Object.is(targetElem, lastListItemElem)) {
-        if (!hasListToggled) {
-          this.set('hasListToggled', true);
-        }
         run.once(() => {
+          if (!hasListToggled) {
+            this.set('hasListToggled', true);
+          }
           this.set('isAnimating', false);
           this.send('broadcastAnimationComplete', event);
         });
@@ -390,11 +390,11 @@ export default Mixin.create({
   */
   _resolveInitialEffectAttrs () {
     assert(
-      `stagger-set must have a valid \`inDirection\``,  // TODO: Link to docs
+      `stagger-set must have a valid \`inDirection\`. Received \`${this.inDirection}\``,  // TODO: Link to docs
       !isNone(this.inDirection) && !!KEYFRAMES_MAP[this.inDirection]
     );
     assert(
-      `stagger-set must have a valid \`inEffect\``,  // TODO: Link to docs
+      `stagger-set must have a valid \`inEffect\`. Received \`${this.inEffect}\``,  // TODO: Link to docs
       !isNone(this.inEffect) && !!KEYFRAMES_MAP[this.inDirection].in[this.inEffect]
     );
 

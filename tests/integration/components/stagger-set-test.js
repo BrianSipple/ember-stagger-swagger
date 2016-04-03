@@ -1,13 +1,16 @@
 import Ember from 'ember';
-import { moduleForComponent, test } from 'ember-qunit';
+import { moduleForComponent } from 'ember-qunit';
+import test from 'dummy/tests/ember-sinon-qunit/test';
 import { skip } from 'qunit';
 import hbs from 'htmlbars-inline-precompile';
+import wait from 'ember-test-helpers/wait';
 import getNode from '../../helpers/integration/get-node';
 import Constants from 'ember-stagger-swagger/constants/constants';
 
 const {
   run,
   set,
+  getOwner,
 } = Ember;
 
 const {
@@ -95,25 +98,50 @@ skip(`broadcasting animation start and animation completion`, function (assert) 
     `);
   });
 });
-//
-//
-//
+
 // test('hiding items from the view if initialized with `showItems` set to `false`', function (assert) {
 //
-//   dataDown = DataDown.create();
+//   dataDown = DataDown.create({ showItems: false });
+//   this.set('dataDown', dataDown);
 //
 //   this.render(hbs`
-//     {{#stagger-set showItems=dataDown.showItems inEffect=dataDown.inEffect inDuration=dataDown.inDirection}}
+//     {{#stagger-set showItems=dataDown.showItems inEffect=dataDown.inEffect inDirection=dataDown.inDirection}}
 //       <li>Seattle</li>
 //       <li>New York City</li>
 //       <li>Boston</li>
 //     {{/stagger-set}}
 //   `);
 //
-//   expected = trues;
+//   expected = true;
 //   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
 //   assert.equal(actual, expected);
 //
+//   run(() => {
+//     set(dataDown, 'showItems', true);
+//   });
+//
+//   this.render(hbs`
+//     {{#stagger-set showItems=dataDown.showItems inEffect=dataDown.inEffect inDirection=dataDown.inDirection}}
+//       <li>Seattle</li>
+//       <li>New York City</li>
+//       <li>Boston</li>
+//     {{/stagger-set}}
+//   `);
+//
+//   expected = false;
+//   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
+//   assert.equal(actual, expected);
+//
+//
+//   // return wait()
+//   //   .then(() => {
+//   //     expected = false;
+//   //     actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
+//   //     assert.equal(actual, expected);
+//   //   });
+// });
+
+
 //
 //   run(() => {
 //     set(dataDown, 'showItems', true);
@@ -125,159 +153,77 @@ skip(`broadcasting animation start and animation completion`, function (assert) 
 // });
 
 
-//
-// test(`toggling the element's animation class hooks when the
-//   value of the \`showItems\` attribute changes -- but only after
-//   the initial render`, function (assert) {
-//
-//   const dataDown = Ember.Object.create({
-//     showItems: false
-//   });
-//
-//   this.set('dataDown', dataDown);
-//
-//   this.render(hbs`
-//     {{#stagger-set showItems=dataDown.showItems}}
-//       template block text
-//     {{/stagger-set}}
-//   `);
-//
-//   expected = false;
-//   actual = getNode(this).classList.contains(CLASS_NAMES.itemsShowing, CLASS_NAMES.itemsCollapsing);
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     dataDown.set('showItems', true);
-//   });
-//
-//   let classList = getNode(this).classList;
-//   expected = true;
-//   actual = classList.contains(CLASS_NAMES.itemsShowing);
-//   assert.equal(actual, expected);
-//
-//   expected = false;
-//   actual = classList.contains(CLASS_NAMES.itemsCollapsing);
-//   assert.equal(actual, expected);
-//
-//
-//   run(() => {
-//     dataDown.set('showItems', false);
-//   });
-//
-//   classList = getNode(this).classList;
-//
-//   expected = false;
-//   actual = classList.contains(CLASS_NAMES.itemsShowing);
-//   assert.equal(actual, expected);
-//
-//   expected = true;
-//   actual = classList.contains(CLASS_NAMES.itemsCollapsing);
-//   assert.equal(actual, expected);
-//
-// });
-//
-//
-// test(`mapping keyframes according to the \`staggerDirection\``, function (assert) {
-//
-//   let currentAnimationDirection = STAGGER_DIRECTIONS.DOWN;
-//
-//   const dataDown = Ember.Object.create({
-//     showItems: false,
-//     staggerDirection: currentAnimationDirection,
-//   });
-//
-//   this.set('dataDown', dataDown);
-//
-//   this.render(hbs`
-//     {{#stagger-set staggerDirection=dataDown.staggerDirection showItems=dataDown.showItems}}
-//       <li>Seattle</li>
-//       <li>New York City</li>
-//       <li>Boston</li>
-//     {{/stagger-set}}
-//   `);
-//
-//   // no animation yet
-//   expected = null;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     dataDown.set('showItems', true);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     dataDown.set('showItems', false);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//
-//
-//   currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.UP];
-//
-//   run(() => {
-//     this.set('staggerDirection', currentAnimationDirection);
-//     this.set('showItems', true);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     this.set('showItems', false);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//
-//
-//   currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.LEFT];
-//
-//   run(() => {
-//     this.set('staggerDirection', currentAnimationDirection);
-//     this.set('showItems', true);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     this.set('showItems', false);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//
-//
-//   currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.RIGHT];
-//
-//   run(() => {
-//     this.set('staggerDirection', currentAnimationDirection);
-//     this.set('showItems', true);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-//   run(() => {
-//     this.set('showItems', false);
-//   });
-//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-//   actual = getNode(this).style.animationName;
-//   assert.equal(actual, expected);
-//
-// });
+
+test(`toggling the element's animation name when the
+  value of the \`showItems\` attribute changes after
+  the initial render`, function (assert) {
+
+  const inEffect = ANIMATION_NAMES.FADE;
+  const inDirection = ANIMATION_DIRECTIONS.DOWN;
+  const dataDown = DataDown.create({ showItems: false, inEffect, inDirection });
+
+  this.set('dataDown', dataDown);
+
+  this.render(hbs`
+    {{#stagger-set
+      inEffect=dataDown.inEffect
+      inDirection=dataDown.inDirection
+      showItems=dataDown.showItems
+    }}
+      <li>Seattle</li>
+      <li>New York City</li>
+      <li>Boston</li>
+    {{/stagger-set}}
+  `);
+
+  expected = '';
+  actual = getNode(this).children[0].style.animationName;
+  assert.equal(actual, expected);
+
+  run(() => {
+    set(dataDown, 'showItems', true);
+  });
+
+  expected = KEYFRAMES_MAP[inDirection].in[inEffect];
+  actual = getNode(this).children[0].style.animationName;
+  assert.equal(actual, expected);
+});
 
 
+test(`mapping keyframes according to the current direction and effect name`, function (assert) {
 
-//
-//
-// test('overriding the animation keyframes applied with the `inAnimationName` and `outAnimationName` attributes', function (assert) {
-//
-// });
+  const dataDown = DataDown.create({ outEffect: null, showItems: false });
+  this.set('dataDown', dataDown);
+
+
+  Object.keys(ANIMATION_DIRECTIONS).forEach((animationDirection) => {
+
+    Object.keys(ANIMATION_NAMES).forEach((animationName) => {
+
+      run(() => {
+        set(dataDown, 'inEffect', ANIMATION_NAMES[animationName]);
+        set(dataDown, 'inDirection', ANIMATION_DIRECTIONS[animationDirection]);
+        set(dataDown, 'showItems', true);
+      });
+
+      this.render(hbs`
+        {{#stagger-set
+          inDirection=dataDown.inDirection
+          inEffect=dataDown.inEffect
+          outEffect=dataDown.outEffect
+          showItems=dataDown.showItems
+        }}
+          <li>Seattle</li>
+          <li>New York City</li>
+          <li>Boston</li>
+        {{/stagger-set}}
+      `);
+
+
+      expected = KEYFRAMES_MAP[ANIMATION_DIRECTIONS[animationDirection]].in[ANIMATION_NAMES[animationName]];
+      actual = getNode(this).children[0].style.animationName;
+      assert.equal(actual, expected);
+
+    });
+  });
+});
