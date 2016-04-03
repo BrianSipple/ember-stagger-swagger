@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/ember-stagger-swagger.svg)](https://badge.fury.io/js/ember-stagger-swagger) [![Build Status](https://travis-ci.org/BrianSipple/ember-stagger-swagger.svg?branch=master)](https://travis-ci.org/BrianSipple/ember-stagger-swagger) [![Ember Observer Score](http://emberobserver.com/badges/ember-stagger-swagger.svg)](http://emberobserver.com/addons/ember-stagger-swagger) [![Code Climate](https://codeclimate.com/github/BrianSipple/ember-stagger-swagger/badges/gpa.svg)](https://codeclimate.com/github/BrianSipple/ember-stagger-swagger)
 
-*GPU-only stagger animation for Ember Components*
+*GPU stagger animation for Ember list items*
 
 ![](http://33.media.tumblr.com/29addca2c908d96a071932761ffd177a/tumblr_nstg1jgKcg1uruo10o1_500.gif)
 
@@ -172,11 +172,30 @@ However, you're free to implement your own keyframes and have them called instea
 
 Together, these hooks can provide more control over interactions with the component during its animation. For example, if you set up a button to trigger toggles of the animation, you might want to make sure that it's disabled between the start and completion events.
 
+```htmlbars
 
-## Future Goals
-* [Improved effects for the vertical `slide` animation](#link-to-issue)?  
+<h2>Spell Ingredients </h2>
+
+{{#stagger-set
+  inDirection="right"
+  inEffect="slideAndFade"
+  onAnimationStart=(action 'loadCannons')
+  onAnimationComplete=(action 'fireCannons')
+}}
+
+  {{#each potions as |potion|}}
+    <li>{{potion.name}}</li>
+  {{/each}}
+
+{{/stagger-set}}
+
+```
+
+
+## Future Goals & Ideas
+* _Tentative_: [Explore improved effects for the vertical `slide` animation](#link-to-issue)?  
   * possibly break the mixins apart to deal with vertical and horizontal animation separately?
-* Removing need for any CSS by using the Web Animations API.
+* _Tentative_: Removing need for any CSS by using the Web Animations API?
   * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `ember-stagger-swagger's` zero-dependency design goals.
 
 

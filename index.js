@@ -2,7 +2,6 @@
 'use strict';
 
 const path = require('path');
-const util = require('util');
 
 const MATCH_CSS = new RegExp('.*\\.css$');
 
@@ -68,23 +67,16 @@ module.exports = {
 
 
   getPostCSSPlugins() {
-    const cssImport = require('postcss-import');
-    const cssCustomProperties = require('postcss-custom-properties');
     const cssWring = require('csswring');
     const cssNext = require('postcss-cssnext');
     const cssReporter = require('postcss-reporter');
-    const cssNested = require('postcss-nested');
 
     return [
-      { module: cssImport },
-      { module: cssCustomProperties },
-      { module: cssNested },
       { module: cssNext, options: cssNextOptions },
 
       // minify all the things!
       { module: cssWring },
 
-      // report all the things!
       { module: cssReporter },
     ];
   },

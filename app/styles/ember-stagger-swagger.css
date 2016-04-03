@@ -1,15 +1,8 @@
 @import './_keyframes.css';
 
-.__ember-stagger-swagger__stagger-set {
 
-  /* TODO: JS all the things? */
-  &.hasnt-entered {
-    > * {
-      &:not(.completed-initial-enter) {
-        visibility: hidden;
-        opacity: 0;
-      }
-    }
-  }
-
+/* TODO: JS all the things? */
+.__ember-stagger-swagger__stagger-set.hasnt-entered > *:not(.completed-initial-enter) {
+  visibility: hidden;
+  opacity: 0;
 }
