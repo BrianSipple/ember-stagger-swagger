@@ -1,3 +1,8 @@
+const CLASS_NAMES = {
+  untoggled: 'hasnt-entered',
+  listItemCompletedInitialToggle: 'completed-initial-enter',
+};
+
 const DEFAULTS = {
 
   /**
@@ -92,6 +97,7 @@ const KEYFRAMES_MAP = {
 
 
 export default {
+  CLASS_NAMES,
   DEFAULTS,
   ANIMATION_DIRECTIONS,
   ANIMATION_NAMES,

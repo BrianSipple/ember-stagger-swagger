@@ -25,17 +25,12 @@ const {
 } = computed;
 
 const {
+  CLASS_NAMES,
   DEFAULTS,
   ANIMATION_DIRECTIONS,
   ANIMATION_NAMES,
   KEYFRAMES_MAP,
 } = Constants;
-
-// TODO: Move to constants as well?
-const CLASS_NAMES = {
-  untoggled: 'hasnt-entered',
-  listItemCompletedInitialToggle: 'completed-initial-enter',
-};
 
 const warningOpts = { id: 'ember-stagger-swagger:stagger-set'};
 
@@ -224,8 +219,16 @@ export default Mixin.create({
     this.element.removeEventListener(`${startEvent}`, this._onStaggerStart, false);
     this.element.removeEventListener(`${endEvent}`, this._onStaggerComplete, false);
 
-    this._listItemElems = null;
-    this._childInsertionListener.disconnect();
+
+    this.set('_onStaggerStart', null);
+    this.set('_onStaggerComplete', null);
+    this.set('_listItemElems', null);
+
+    if (this._childInsertionListener) {
+      this._childInsertionListener.disconnect();
+      this.set('_childInsertionListener', null);
+      this.set('_onChildElementsInserted', null);
+    }
   },
 
   /* -------------------- ACTIONS ---------------------- */

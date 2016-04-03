@@ -73,17 +73,21 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
   * _default_: `null`
   * _constraints_: None. Just make sure the name matches a CSS animation keyframe that you have defined in your project.
 
-##### <a name="api-enterOnRender"></a> `enterOnRender`  
-  * _description_: Whether or not the elements in the stagger set should animate into view when the component is rendered.
-  * _required_: no
-  * _default_: `true`
-  * _constraints_: `true` or `false`  
 
 ##### <a name="api-showItems"></a> `showItems`  
-  * _description_: Manual hook for toggling the animation back and forth according to its in and out settings.
+  * _description_: Manual hook for toggling the set between its entrance and exit animations.
   * _required_: no
   * _default_: `true` to correspond with [`enterOnRender`](#api-enterOnRender)'s default.
   * _constraints_: `true` or `false`    
+
+
+##### <a name="api-enterOnRender"></a> `enterOnRender`  
+  * _description_: Whether or not the elements in the stagger set should animate into view when the component is rendered.  
+  *Note:* `enterOnRender` allows for a
+  more fine-grained level of control than just using `showItems`. Without `enterOnRender`, initializing the component with `showItems` set to `true` will cause the items to render in their normal visible state, from which the animation can be toggled further. Setting `enterOnRender` to true -- in conjunction with setting `showItems` to true (both of which are the default) -- creates a stagger-in animation on render and then hinges on the state of `showItems` going forward.
+  * _required_: no
+  * _default_: `true`
+  * _constraints_: `true` or `false`   
 
 
 ##### <a name="api-staggerInterval"></a> `staggerInterval`
@@ -169,11 +173,11 @@ A `stagger-set` component has only 2 required arguments: `inDirection` and `inEf
   * called with:
     * `animationEvent`: the [`animationevent` object](https://developer.mozilla.org/en-US/docs/Web/Events/animationend#Properties)
 
-Together, these hooks can provide more control over interactions with the component during its animation. For example, if you set up a button to trigger toggles of the animation, you might want to make sure that its disable between the start and completion events.
+Together, these hooks can provide more control over interactions with the component during its animation. For example, if you set up a button to trigger toggles of the animation, you might want to make sure that it's disabled between the start and completion events.
 
 
 ## Future Goals
-* Improved vertical slide effects
+* [Improved effects for the vertical `slide` animation](#link-to-issue)?  
   * possibly break the mixins apart to deal with vertical and horizontal animation separately?
 * Removing need for any CSS by using the Web Animations API.
   * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `ember-stagger-swagger's` zero-dependency design goals.

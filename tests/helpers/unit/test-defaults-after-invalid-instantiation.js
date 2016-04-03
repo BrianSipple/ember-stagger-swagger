@@ -8,8 +8,8 @@ export default function testDefaultsAfterInvalidInstantiation (
   constructorObj,
   propName,
   expectedValue,
-  standardObjConfig = {},
-  invalidInputs
+  invalidInputs,
+  standardObjConfig = {}
 ) {
 
   invalidInputs.forEach((input) => {

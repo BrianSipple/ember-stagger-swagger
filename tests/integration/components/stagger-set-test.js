@@ -1,25 +1,28 @@
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
+import { skip } from 'qunit';
 import hbs from 'htmlbars-inline-precompile';
 import getNode from '../../helpers/integration/get-node';
+import Constants from 'ember-stagger-swagger/constants/constants';
 
 const {
   run,
-  warn,
+  set,
 } = Ember;
 
-const CLASS_NAMES = {
-  itemsHidden: 'items-hidden',
-  itemsShowing: 'items-showing',
-  itemsCollapsing: 'items-collapsing',
-};
-
 const {
+  CLASS_NAMES,
+  DEFAULTS,
   ANIMATION_DIRECTIONS,
   ANIMATION_NAMES,
   KEYFRAMES_MAP,
 } = Constants;
 
+const DataDown = Ember.Object.extend({
+  showItems: false,
+  inDirection: ANIMATION_DIRECTIONS.RIGHT,
+  inEffect: ANIMATION_NAMES.SLIDE_AND_FADE,
+});
 
 function renderMinimalContent () {
   this.render(hbs`
@@ -30,6 +33,7 @@ function renderMinimalContent () {
 }
 
 
+let dataDown;
 let actual, expected;
 
 moduleForComponent('stagger-set', 'Integration | Component | stagger set', {
@@ -47,187 +51,228 @@ test('rendering block content', function(assert) {
 });
 
 
+skip(`broadcasting animation start and animation completion`, function (assert) {
 
-test(`during didInsertElement: properly setting \`itemsHidden\` based
-  upon the value of \`showItems\``, function (assert) {
+  function onAnimationStart (event) {
+    expected = true;
+    actual = event instanceof AnimationEvent;
+    assert.equal(actual, expected);
 
-  this.set('showItems', true);
+    expected = 'animationstart';
+    actual = event.type;
+    assert.equal(actual, expected);
+  }
 
-  this.render(hbs`
-    {{#stagger-set showItems=showItems}}
-      template block text
-    {{/stagger-set}}
-  `);
+  function onAnimationComplete (event) {
+    expected = true;
+    actual = event instanceof AnimationEvent;
+    assert.equal(actual, expected);
 
-  expected = false;
-  actual = getNode(this).classList.contains(CLASS_NAMES.itemsHidden);
-  assert.equal(actual, expected);
+    expected = 'animationend';
+    actual = event.type;
+    assert.equal(actual, expected);
+  }
 
+  dataDown = DataDown.create({ showItems: false });
 
-  run(() => {
-    this.set('showItems', false);
-  });
-
-  this.render(hbs`
-    {{#stagger-set showItems=showItems}}
-      template block text
-    {{/stagger-set}}
-  `);
-
-  expected = true;
-  actual = getNode(this).classList.contains(CLASS_NAMES.itemsHidden);
-  assert.equal(actual, expected);
-});
-
-
-
-test(`toggling the element's animation class hooks when the
-  value of the \`showItems\` attribute changes -- but only after
-  the initial render`, function (assert) {
-
-  const dataDown = Ember.Object.create({
-    showItems: false
-  });
-
+  this.set('onAnimationComplete', onAnimationComplete);
+  this.set('onAnimationStart', onAnimationStart);
   this.set('dataDown', dataDown);
 
-  this.render(hbs`
-    {{#stagger-set showItems=dataDown.showItems}}
-      template block text
-    {{/stagger-set}}
-  `);
-
-  expected = false;
-  actual = getNode(this).classList.contains(CLASS_NAMES.itemsShowing, CLASS_NAMES.itemsCollapsing);
-  assert.equal(actual, expected);
-
   run(() => {
-    dataDown.set('showItems', true);
+    this.render(hbs`
+      {{#stagger-set
+        showItems=dataDown.showItems
+        inEffect=dataDown.inEffect
+        inDirection=dataDown.inDirection
+        onAnimationStart=onAnimationStart
+        onAnimationComplete=onAnimationComplete
+      }}
+        <li>Seattle</li>
+        <li>New York City</li>
+        <li>Boston</li>
+      {{/stagger-set}}
+    `);
   });
-
-  let classList = getNode(this).classList;
-  expected = true;
-  actual = classList.contains(CLASS_NAMES.itemsShowing);
-  assert.equal(actual, expected);
-
-  expected = false;
-  actual = classList.contains(CLASS_NAMES.itemsCollapsing);
-  assert.equal(actual, expected);
-
-
-  run(() => {
-    dataDown.set('showItems', false);
-  });
-
-  classList = getNode(this).classList;
-
-  expected = false;
-  actual = classList.contains(CLASS_NAMES.itemsShowing);
-  assert.equal(actual, expected);
-
-  expected = true;
-  actual = classList.contains(CLASS_NAMES.itemsCollapsing);
-  assert.equal(actual, expected);
-
 });
+//
+//
+//
+// test('hiding items from the view if initialized with `showItems` set to `false`', function (assert) {
+//
+//   dataDown = DataDown.create();
+//
+//   this.render(hbs`
+//     {{#stagger-set showItems=dataDown.showItems inEffect=dataDown.inEffect inDuration=dataDown.inDirection}}
+//       <li>Seattle</li>
+//       <li>New York City</li>
+//       <li>Boston</li>
+//     {{/stagger-set}}
+//   `);
+//
+//   expected = trues;
+//   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
+//   assert.equal(actual, expected);
+//
+//
+//   run(() => {
+//     set(dataDown, 'showItems', true);
+//   });
+//
+//   expected = true;
+//   actual = getNode(this).classList.contains(CLASS_NAMES.untoggled);
+//   assert.equal(actual, expected);
+// });
 
 
-test(`mapping keyframes according to the \`staggerDirection\``, function (assert) {
-
-  let currentAnimationDirection = STAGGER_DIRECTIONS.DOWN;
-
-  const dataDown = Ember.Object.create({
-    showItems: false,
-    staggerDirection: currentAnimationDirection,
-  });
-
-  this.set('dataDown', dataDown);
-
-  this.render(hbs`
-    {{#stagger-set staggerDirection=dataDown.staggerDirection showItems=dataDown.showItems}}
-      <li>Seattle</li>
-      <li>New York City</li>
-      <li>Boston</li>
-    {{/stagger-set}}
-  `);
-
-  // no animation yet
-  expected = null;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-  run(() => {
-    dataDown.set('showItems', true);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-  run(() => {
-    dataDown.set('showItems', false);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-
-
-  currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.UP];
-
-  run(() => {
-    this.set('staggerDirection', currentAnimationDirection);
-    this.set('showItems', true);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-  run(() => {
-    this.set('showItems', false);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-
-
-  currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.LEFT];
-
-  run(() => {
-    this.set('staggerDirection', currentAnimationDirection);
-    this.set('showItems', true);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-  run(() => {
-    this.set('showItems', false);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-
-
-  currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.RIGHT];
-
-  run(() => {
-    this.set('staggerDirection', currentAnimationDirection);
-    this.set('showItems', true);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-  run(() => {
-    this.set('showItems', false);
-  });
-  expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
-  actual = getNode(this).style.animationName;
-  assert.equal(actual, expected);
-
-});
+//
+// test(`toggling the element's animation class hooks when the
+//   value of the \`showItems\` attribute changes -- but only after
+//   the initial render`, function (assert) {
+//
+//   const dataDown = Ember.Object.create({
+//     showItems: false
+//   });
+//
+//   this.set('dataDown', dataDown);
+//
+//   this.render(hbs`
+//     {{#stagger-set showItems=dataDown.showItems}}
+//       template block text
+//     {{/stagger-set}}
+//   `);
+//
+//   expected = false;
+//   actual = getNode(this).classList.contains(CLASS_NAMES.itemsShowing, CLASS_NAMES.itemsCollapsing);
+//   assert.equal(actual, expected);
+//
+//   run(() => {
+//     dataDown.set('showItems', true);
+//   });
+//
+//   let classList = getNode(this).classList;
+//   expected = true;
+//   actual = classList.contains(CLASS_NAMES.itemsShowing);
+//   assert.equal(actual, expected);
+//
+//   expected = false;
+//   actual = classList.contains(CLASS_NAMES.itemsCollapsing);
+//   assert.equal(actual, expected);
+//
+//
+//   run(() => {
+//     dataDown.set('showItems', false);
+//   });
+//
+//   classList = getNode(this).classList;
+//
+//   expected = false;
+//   actual = classList.contains(CLASS_NAMES.itemsShowing);
+//   assert.equal(actual, expected);
+//
+//   expected = true;
+//   actual = classList.contains(CLASS_NAMES.itemsCollapsing);
+//   assert.equal(actual, expected);
+//
+// });
+//
+//
+// test(`mapping keyframes according to the \`staggerDirection\``, function (assert) {
+//
+//   let currentAnimationDirection = STAGGER_DIRECTIONS.DOWN;
+//
+//   const dataDown = Ember.Object.create({
+//     showItems: false,
+//     staggerDirection: currentAnimationDirection,
+//   });
+//
+//   this.set('dataDown', dataDown);
+//
+//   this.render(hbs`
+//     {{#stagger-set staggerDirection=dataDown.staggerDirection showItems=dataDown.showItems}}
+//       <li>Seattle</li>
+//       <li>New York City</li>
+//       <li>Boston</li>
+//     {{/stagger-set}}
+//   `);
+//
+//   // no animation yet
+//   expected = null;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//   run(() => {
+//     dataDown.set('showItems', true);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//   run(() => {
+//     dataDown.set('showItems', false);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//
+//
+//   currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.UP];
+//
+//   run(() => {
+//     this.set('staggerDirection', currentAnimationDirection);
+//     this.set('showItems', true);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//   run(() => {
+//     this.set('showItems', false);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//
+//
+//   currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.LEFT];
+//
+//   run(() => {
+//     this.set('staggerDirection', currentAnimationDirection);
+//     this.set('showItems', true);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//   run(() => {
+//     this.set('showItems', false);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//
+//
+//   currentAnimationDirection = ANIMATION_NAME_MAP[STAGGER_DIRECTIONS.RIGHT];
+//
+//   run(() => {
+//     this.set('staggerDirection', currentAnimationDirection);
+//     this.set('showItems', true);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].in;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+//   run(() => {
+//     this.set('showItems', false);
+//   });
+//   expected = ANIMATION_NAME_MAP[currentAnimationDirection].out;
+//   actual = getNode(this).style.animationName;
+//   assert.equal(actual, expected);
+//
+// });
 
 
 

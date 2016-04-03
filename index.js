@@ -24,12 +24,19 @@ module.exports = {
 
   _isAddon: function () {
     const keywords = this.project.pkg.keywords;
-    return keywords && ~!!keywords.indexOf('ember-addon');
+    return !!(keywords && ~keywords.indexOf('ember-addon'));
+  },
+
+  _isDummyApp () {
+    return !!( (this._isAddon()) && this.name === 'ember-stagger-swagger');
   },
 
   included: function (app) {
     this._super.included(app);
 
+    if (this._isDummyApp()) {
+      app.import(path.join('app/styles', this._getCSSFileName()));
+    }
 
     if (!this._isAddon()) {
       app.import(path.join('vendor', this._getCSSFileName()));

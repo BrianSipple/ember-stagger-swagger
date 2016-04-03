@@ -99,12 +99,13 @@ test(`\`staggerInterval\` defaults to ${DEFAULTS.STAGGER_INTERVAL_MS} when it's
 
   expected = DEFAULTS.STAGGER_INTERVAL_MS;
 
-  testDefaultsAfterInvalidInstantiation(assert,
+  testDefaultsAfterInvalidInstantiation(
+    assert,
     StaggerSetObject,
     'staggerInterval',
     expected,
-    minimalConfig,
-    [invalidNaN, invalidNumber, invalidNumber2]
+    [invalidNaN, invalidNumber, invalidNumber2],
+    minimalConfig
   );
 });
 
@@ -130,8 +131,8 @@ test(`\`inDelay\` defaults to ${DEFAULTS.ANIMATION_DELAY_IN} if not set
     StaggerSetObject,
     'inDelay',
     expected,
-    minimalConfig,
-    [invalidNaN, invalidNumber]
+    [invalidNaN, invalidNumber],
+    minimalConfig
   );
 });
 
@@ -158,8 +159,8 @@ test(`\`outDelay\` defaults to matching \`inDelay\` if not set
     StaggerSetObject,
     'outDelay',
     expected,
-    minimalConfig,
-    [invalidNaN, invalidNumber]
+    [invalidNaN, invalidNumber],
+    minimalConfig
   );
 });
 
@@ -187,8 +188,8 @@ test(`\`inDuration\` defaults to ${DEFAULTS.ANIMATION_DURATION_IN} if not set
     StaggerSetObject,
     'inDuration',
     expected,
-    minimalConfig,
-    [invalidNaN, invalidNumber, invalidNumber2]
+    [invalidNaN, invalidNumber, invalidNumber2],
+    minimalConfig
   );
 });
 
@@ -216,8 +217,8 @@ test(`\`outDuration\` defaults to matching \`inDuration\` if not set
     StaggerSetObject,
     'outDuration',
     expected,
-    minimalConfig,
-    [invalidNaN, invalidNumber, invalidNumber2]
+    [invalidNaN, invalidNumber, invalidNumber2],
+    minimalConfig
   );
 });
 
