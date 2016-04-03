@@ -1,3 +1,5 @@
+/* jshint ignore:start */
+
 /**
  * Helper function that instantiates an object with invalid property values,
  * and tests that the value was set to an expected default.

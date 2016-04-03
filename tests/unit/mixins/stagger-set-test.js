@@ -1,3 +1,5 @@
+/* jshint ignore:start */
+
 import Ember from 'ember';
 import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 import { module, test } from 'qunit';
@@ -15,17 +17,6 @@ const minimalConfig = {
   inDirection: ANIMATION_DIRECTIONS.LEFT,
   inEffect: ANIMATION_NAMES.SLIDE_AND_FADE,
 };
-//
-// function testSettingToDefault (assert, constructorObj, propName, expectedValue, invalidInputs) {
-//
-//   invalidInputs.forEach((val) => {
-//     subject = constructorObj.create({...minimalConfig, [propName]: val });
-//     expected = expectedValue;
-//     actual = subject.get(`${propName}`);
-//     assert.equal(actual, expected);
-//   });
-//
-// }
 
 
 let StaggerSetObject, subject;

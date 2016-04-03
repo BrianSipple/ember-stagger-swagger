@@ -1,21 +1,16 @@
 import Ember from 'ember';
-import { moduleForComponent } from 'ember-qunit';
-import test from 'dummy/tests/ember-sinon-qunit/test';
+import { moduleForComponent, test } from 'ember-qunit';
 import { skip } from 'qunit';
 import hbs from 'htmlbars-inline-precompile';
-import wait from 'ember-test-helpers/wait';
 import getNode from '../../helpers/integration/get-node';
 import Constants from 'ember-stagger-swagger/constants/constants';
 
 const {
   run,
   set,
-  getOwner,
 } = Ember;
 
 const {
-  CLASS_NAMES,
-  DEFAULTS,
   ANIMATION_DIRECTIONS,
   ANIMATION_NAMES,
   KEYFRAMES_MAP,
@@ -58,7 +53,7 @@ skip(`broadcasting animation start and animation completion`, function (assert) 
 
   function onAnimationStart (event) {
     expected = true;
-    actual = event instanceof AnimationEvent;
+    actual = event instanceof window.AnimationEvent;
     assert.equal(actual, expected);
 
     expected = 'animationstart';
@@ -68,7 +63,7 @@ skip(`broadcasting animation start and animation completion`, function (assert) 
 
   function onAnimationComplete (event) {
     expected = true;
-    actual = event instanceof AnimationEvent;
+    actual = event instanceof window.AnimationEvent;
     assert.equal(actual, expected);
 
     expected = 'animationend';
