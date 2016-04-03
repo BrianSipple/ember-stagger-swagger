@@ -2,11 +2,7 @@
 
 const packagesToAdd = [
   { name: 'broccoli-funnel', target: '^1.0.1' },
-  { name: 'csswring', target: '^4.2.2' },
-  { name: 'postcss-cssnext', target: '^2.5.1' },
-  { name: 'postcss-reporter', target: '^1.3.3' },
   { name: 'broccoli-merge-trees', target: '^1.1.1' },
-  { name: 'broccoli-postcss', target: '^2.1.1' },
 ];
 
 

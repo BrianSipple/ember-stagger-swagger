@@ -49,36 +49,13 @@ module.exports = {
 
     const Funnel = require('broccoli-funnel');
     const mergeTrees = require('broccoli-merge-trees');
-    const compileCSS = require('broccoli-postcss');
-    const sourcemapsOpts = { inline: false };
-
     const stylesPath = path.join(this.project.nodeModulesPath, this.name, 'app', 'styles');
 
-    const inputTrees = new Funnel(stylesPath, { include: [MATCH_CSS] });
-    const inputFile = this._getCSSFileName();
-    const outputFile = inputFile;
-    const postCSSPlugins = this.getPostCSSPlugins();
-    const cssTree = compileCSS([inputTrees], inputFile, outputFile, postCSSPlugins, sourcemapsOpts);
+    const cssTree = new Funnel(stylesPath, { include: [MATCH_CSS] });
 
     node = node ? mergeTrees([node, cssTree]) : cssTree;
 
     return node;
-  },
-
-
-  getPostCSSPlugins() {
-    const cssWring = require('csswring');
-    const cssNext = require('postcss-cssnext');
-    const cssReporter = require('postcss-reporter');
-
-    return [
-      { module: cssNext, options: cssNextOptions },
-
-      // minify all the things!
-      { module: cssWring },
-
-      { module: cssReporter },
-    ];
-  },
-
+  }
+  
 };
