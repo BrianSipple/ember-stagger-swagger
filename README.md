@@ -196,7 +196,7 @@ Together, these hooks can provide more control over interactions with the compon
 * _Tentative_: [Explore improved effects for the vertical `slide` animation](#link-to-issue)?  
   * possibly break the mixins apart to deal with vertical and horizontal animation separately?
 * _Tentative_: Removing need for any CSS by using the Web Animations API?
-  * Libraries like GSAP or Velocity are great for fulfilling that today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're too heavy for just a handful of base defaults and go against `ember-stagger-swagger's` zero-dependency design goals.
+  * Libraries like GSAP or Velocity are great for enabling pure JavaScript animation today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're a bit too heavy for this addon, which only seeks to provide a handful of base effects and mainly concerns itself with encapsulating functionality.
 
 
 ## Developing Locally
