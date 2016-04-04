@@ -1,4 +1,8 @@
-1.0.3 / 03-04-2016 (dd-mm-yyyy)
+1.0.4 / 03-04-2016 (dd-mm-yyyy)
+================================
+* Remove dependency adding in blueprint (see: https://github.com/BrianSipple/ember-stagger-swagger/issues/1)
+
+1.0.3 / 03-04-2016
 ================================
 * Bring keyframes into main css file
   * Fixes broken import
