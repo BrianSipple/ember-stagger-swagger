@@ -43,7 +43,7 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 
 ##### <a name="api-inDirection"></a>`inDirection`  
   * _description_: The direction of animation when the items stagger into view.
-  * _required_: *yes*
+  * ***_required_: yes***
   * _constraints_: A string keyword matching either `'left'`, `'down'`, `'right'`, or `'up'`.
 
 ##### <a name="api-outDirection"></a> `outDirection`  
@@ -54,7 +54,7 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
 
 ##### <a name="api-inEffect"></a> `inEffect`  
   * _description_: A recognized animation effect applied to each list item when it's animating in.
-  * _required_: *yes*
+  * ***_required_: yes***
   * _constraints_: A string keyword matching either `'slideAndFade'`, `'slide'`, `'fade'`, or `'scale'` (see the [demo][demo] for a preview of each).
 
 ##### <a name="api-outEffect"></a> `outEffect`  
