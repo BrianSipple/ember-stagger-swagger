@@ -1,4 +1,8 @@
-1.0.4 / 03-04-2016 (dd-mm-yyyy)
+1.0.5 / 04-04-2016 (dd-mm-yyyy)
+================================
+* Fix build by using Chrome in TravisCI.
+
+1.0.4 / 03-04-2016
 ================================
 * Remove dependency adding in blueprint (see: https://github.com/BrianSipple/ember-stagger-swagger/issues/1)
 
