@@ -1,4 +1,8 @@
-1.0.5 / 04-04-2016 (dd-mm-yyyy)
+1.0.6 / 06-04-2016 (dd-mm-yyyy)
+================================
+* hotfix: set `isDevelopingAddon` to false 😳
+
+1.0.5 / 04-04-2016
 ================================
 * Fix build by using Chrome in TravisCI.
 

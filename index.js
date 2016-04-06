@@ -14,7 +14,7 @@ module.exports = {
   name: 'ember-stagger-swagger',
 
   isDevelopingAddon () {
-    return true;
+    return false;
   },
 
   _getCSSFileName: function () {
@@ -57,5 +57,5 @@ module.exports = {
 
     return node;
   }
-  
+
 };
