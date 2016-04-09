@@ -15,7 +15,7 @@ const {
   Mixin,
   computed,
   run,
-  warn,
+  Logger: { warn },
   assert,
   isNone,
 } = Ember;
@@ -32,7 +32,7 @@ const {
   KEYFRAMES_MAP,
 } = Constants;
 
-const warningOpts = { id: 'ember-stagger-swagger:stagger-set'};
+const warningPreface = 'ember-stagger-swagger:stagger-set-mixin: ';
 
 export default Mixin.create({
 
@@ -346,29 +346,35 @@ export default Mixin.create({
   */
   _resolveInitialTimingAttrs () {
 
+    this.staggerInterval = this.staggerInterval || DEFAULTS.STAGGER_INTERVAL_MS;
+    this.inDelay = this.inDelay || DEFAULTS.ANIMATION_DELAY_IN;
+    this.outDelay = this.outDelay || DEFAULTS.ANIMATION_DELAY_OUT;
+    this.inDuration = this.inDuration || DEFAULTS.ANIMATION_DURATION_IN;
+    this.outDuration = this.outDuration || DEFAULTS.ANIMATION_DURATION_OUT;
+
     /* eslint-disable max-len */
     if (isNone(this.staggerInterval) || Number.isNaN(Number(this.staggerInterval)) || this.staggerInterval < 32) {
-      warn(`Invalid \`staggerInterval\`: ${this.staggerInterval}. Please use a numeric value greater than or equal to 32 (milliseconds). Defaulting to ${DEFAULTS.STAGGER_INTERVAL_MS} milliseconds`, null, warningOpts);
+      warn(warningPreface, `Invalid \`staggerInterval\`: ${this.staggerInterval}. Please use a numeric value greater than or equal to 32 (milliseconds). Defaulting to ${DEFAULTS.STAGGER_INTERVAL_MS} milliseconds`);
       this.staggerInterval = DEFAULTS.STAGGER_INTERVAL_MS;
     }
 
     if (isNone(this.inDelay) || Number.isNaN(Number(this.inDelay)) || this.inDelay < 0) {
-      warn(`Invalid \`inDelay\`: ${this.inDelay}. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_IN}`, null, warningOpts);
+      warn(warningPreface, `Invalid \`inDelay\`: ${this.inDelay}. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_IN}`);
       this.inDelay = DEFAULTS.ANIMATION_DELAY_IN;
     }
 
     if (isNone(this.outDelay) || Number.isNaN(Number(this.outDelay)) || this.outDelay < 0) {
-      warn(`Invalid \`outDelay\`: ${this.outDelay}. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_OUT}`, null, warningOpts);
+      warn(warningPreface, `Invalid \`outDelay\`: ${this.outDelay}. Please use a numeric value greater than or equal to zero. Defaulting to ${DEFAULTS.ANIMATION_DELAY_OUT}`);
       this.outDelay = DEFAULTS.ANIMATION_DELAY_IN;
     }
 
     if (isNone(this.inDuration) || Number.isNaN(Number(this.inDuration)) || this.inDuration <= 0) {
-      warn(`Invalid \`inDuration\`: ${this.inDuration}. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_IN}`, null, warningOpts);
+      warn(warningPreface, `Invalid \`inDuration\`: ${this.inDuration}. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_IN}`);
       this.inDuration = DEFAULTS.ANIMATION_DURATION_IN;
     }
 
     if (isNone(this.outDuration) || Number.isNaN(Number(this.outDuration)) || this.outDuration <= 0) {
-      warn(`Invalid \`outDuration\`: ${this.outDuration}. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_OUT}`, null, warningOpts);
+      warn(warningPreface, `Invalid \`outDuration\`: ${this.outDuration}. Please use a numeric value greater than zero. Defaulting to ${DEFAULTS.ANIMATION_DURATION_OUT}`);
       this.outDuration = DEFAULTS.ANIMATION_DURATION_OUT;
     }
     /* eslint-enable max-len */
@@ -403,7 +409,7 @@ export default Mixin.create({
       this.outDirection = this.inDirection;
 
     } else if (!KEYFRAMES_MAP[this.outDirection]) {
-      warn(`Invalid \`outDirection\`: ${this.outDirection}. Defaulting to ${this.inDirection}`, null, warningOpts);
+      warn(warningPreface, `Invalid \`outDirection\`: ${this.outDirection}. Defaulting to ${this.inDirection}`);
       this.outDirection = this.inDirection;
     }
 
@@ -411,7 +417,7 @@ export default Mixin.create({
       this.outEffect = this.inEffect;
 
     } else if (!!KEYFRAMES_MAP[this.outDirection].out[this.outEffect]) {
-      warn(`Invalid \`outEffect\`: ${this.outEffect}. Defaulting to ${this.inEffect}`, null, warningOpts);
+      warn(warningPreface, `Invalid \`outEffect\`: ${this.outEffect}. Defaulting to ${this.inEffect}`);
       this.outEffect = this.inEffect;
     }
     /* eslint-enable max-len */
