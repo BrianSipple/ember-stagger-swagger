@@ -1,4 +1,9 @@
-1.0.6 / 06-04-2016 (dd-mm-yyyy)
+1.0.7 / 09-04-2016 (dd-mm-yyyy)
+================================
+* perform short-circuited default setting before warning for invalid arguments.
+* use `Ember.Logger.warn` instead of `Ember.warn`
+
+1.0.6 / 06-04-2016
 ================================
 * hotfix: set `isDevelopingAddon` to false 😳
 
