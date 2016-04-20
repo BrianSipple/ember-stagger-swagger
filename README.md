@@ -116,14 +116,14 @@ import StaggerSetMixin from 'ember-stagger-swagger/mixins/stagger-set';
   * _description_: The [animation-timing-function](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timing-function) applied to each item in the set when it's animating in.
   * _required_: no
   * _default_: `cubic-bezier(0.215, 0.610, 0.355, 1.000)` (AKA ["ease-out-cubic"](http://easings.net/#easeOutCubic))
-  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this property is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
+  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this value is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
 
 
 ##### <a name="api-outTimingFunc"></a> `outTimingFunc`  
   * _description_: The [animation-timing-function](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timing-function) applied to each item in the set when it's animating out.
   * _required_: no
   * _default_: `cubic-bezier(0.55, 0.055, 0.675, 0.19)` (AKA ["ease-in-cubic"](http://easings.net/#easeInCubic))
-  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this property is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
+  * _constraints_: a string matching any [valid CSS `timing-function` value](https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function). If this value is invalid, the browser will default to using [`ease`](http://cubic-bezier.com/#.25,.1,.25,1).
 
 ##### <a name="api-inDuration"></a> `inDuration`  
   * _description_: The duration (in milliseconds) that *a single item* will take when animating in.
@@ -162,11 +162,11 @@ However, you're free to implement your own keyframes and have them called instea
 
 ## Action Hooks
 
-* `onAnimationStart`: called immediately after the last item in the set triggers its [`animationstart`](https://developer.mozilla.org/en-US/docs/Web/Events/animationstart) event.
+* `onAnimationStart`: called immediately after the _first_ item in the set triggers its [`animationstart`](https://developer.mozilla.org/en-US/docs/Web/Events/animationstart) event.
   * called with:
     * `animationEvent`: the [`animationevent` object](https://developer.mozilla.org/en-US/docs/Web/Events/animationstart#Properties)
 
-* `onAnimationComplete`: called immediately after the last item in the set triggers its [`animationend`](https://developer.mozilla.org/en-US/docs/Web/Events/animationend) event.
+* `onAnimationComplete`: called immediately after the _last_ item in the set triggers its [`animationend`](https://developer.mozilla.org/en-US/docs/Web/Events/animationend) event.
   * called with:
     * `animationEvent`: the [`animationevent` object](https://developer.mozilla.org/en-US/docs/Web/Events/animationend#Properties)
 
@@ -195,7 +195,7 @@ Together, these hooks can provide more control over interactions with the compon
 ## Future Goals & Ideas
 * _Tentative_: [Explore improved effects for the vertical `slide` animation](#link-to-issue)?  
   * possibly break the mixins apart to deal with vertical and horizontal animation separately?
-* _Tentative_: Removing need for any CSS by using the Web Animations API?
+* _Tentative_: Removing need for any CSS by using the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)?
   * Libraries like GSAP or Velocity are great for enabling pure JavaScript animation today (see: [`liquid-fire-velocity`](https://github.com/ember-animation/liquid-fire-velocity)), but they're a bit too heavy for this addon, which only seeks to provide a handful of base effects and mainly concerns itself with encapsulating functionality.
 
 

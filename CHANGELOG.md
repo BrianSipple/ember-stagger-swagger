@@ -1,4 +1,8 @@
-1.0.7 / 09-04-2016 (dd-mm-yyyy)
+1.0.8 / 20-04-2016 (dd-mm-yyyy)
+================================
+* Fix typo in README describing when the `onAnimationStart` action was called.
+
+1.0.7 / 09-04-2016
 ================================
 * perform short-circuited default setting before warning for invalid arguments.
 * use `Ember.Logger.warn` instead of `Ember.warn`
