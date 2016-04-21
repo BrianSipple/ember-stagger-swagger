@@ -1,4 +1,8 @@
-1.0.8 / 20-04-2016 (dd-mm-yyyy)
+1.0.9 / 20-04-2016 (dd-mm-yyyy)
+================================
+* Upgrade to `ember@2.5` and `ember-cli@2.6.0-beta.1`
+
+1.0.8 / 20-04-2016
 ================================
 * Fix typo in README describing when the `onAnimationStart` action was called.
 
