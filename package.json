@@ -1,6 +1,6 @@
 {
   "name": "ember-stagger-swagger",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "GPU stagger animation for Ember list items",
   "directories": {
     "doc": "doc",
