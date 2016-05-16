@@ -1,4 +1,8 @@
-1.0.9 / 20-04-2016 (dd-mm-yyyy)
+1.0.10 / 15-05-2016 (dd-mm-yyyy)
+================================
+* `visibility` is no longer set to `hidden` on items that have yet to be animated in (The only rule now applied is `opacity: 0`). This prevents an issue in Safari where even when toggling `visibility` back to `visible`, items would retain their status of `hidden`.
+
+1.0.9 / 20-04-2016
 ================================
 * Upgrade to `ember@2.5` and `ember-cli@2.6.0-beta.1`
 
