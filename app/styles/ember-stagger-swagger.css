@@ -1,8 +1,9 @@
 /* TODO: JS all the things? */
-.__ember-stagger-swagger__stagger-set.hasnt-entered > *:not(.completed-initial-enter) {
-  visibility: hidden;
+.__ember-stagger-swagger__stagger-set.hasnt-entered > :not(.completed-initial-enter) {
   opacity: 0;
 }
+
+
 
 /* ---------------------    KEYFRAMES   ---------------------  */
 
