@@ -1,6 +1,7 @@
 # ember-stagger-swagger
 
-[![npm version](https://badge.fury.io/js/ember-stagger-swagger.svg)](https://badge.fury.io/js/ember-stagger-swagger) [![Build Status](https://travis-ci.org/BrianSipple/ember-stagger-swagger.svg?branch=master)](https://travis-ci.org/BrianSipple/ember-stagger-swagger) [![Ember Observer Score](http://emberobserver.com/badges/ember-stagger-swagger.svg)](http://emberobserver.com/addons/ember-stagger-swagger)
+[![npm version](https://badge.fury.io/js/ember-stagger-swagger.svg)](https://badge.fury.io/js/ember-stagger-swagger)
+[![Build Status](https://travis-ci.org/BrianSipple/ember-stagger-swagger.svg?branch=master)](https://travis-ci.org/BrianSipple/ember-stagger-swagger) [![Ember Observer Score](http://emberobserver.com/badges/ember-stagger-swagger.svg)](http://emberobserver.com/addons/ember-stagger-swagger)
 
 *GPU stagger animation for Ember list items*
 
