@@ -1,4 +1,8 @@
-1.0.10 / 15-05-2016 (dd-mm-yyyy)
+1.0.11 / 02-06-2016 (dd-mm-yyyy)
+================================
+* Fixed an error in `_setAnimationValuesForItems` where `inDelay` and `outDelay` weren't being accounted for (thanks @techsoldaten)
+
+1.0.10 / 15-05-2016
 ================================
 * `visibility` is no longer set to `hidden` on items that have yet to be animated in (The only rule now applied is `opacity: 0`). This prevents an issue in Safari where even when toggling `visibility` back to `visible`, items would retain their status of `hidden`.
 
