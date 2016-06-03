@@ -1,6 +1,11 @@
-1.0.11 / 02-06-2016 (dd-mm-yyyy)
+1.0.12 / 02-06-2016 (dd-mm-yyyy)
 ================================
-* Fixed an error in `_setAnimationValuesForItems` where `inDelay` and `outDelay` weren't being accounted for (thanks @techsoldaten)
+* Fixed boolean logic when checking for an initial `outEffect` argument in `_resolveInitialEffectAttrs`. (`!!` was
+  being used instead of `!`, causing an unnecessary warning message to be logged to the console.)
+
+1.0.11 / 02-06-2016
+================================
+* Fixed an error in `_setAnimationValuesForItems` where `inDelay` and `outDelay` weren't being accounted for (thanks [@techsoldaten](https://github.com/techsoldaten))
 
 1.0.10 / 15-05-2016
 ================================
