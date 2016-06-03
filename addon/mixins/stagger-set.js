@@ -416,7 +416,7 @@ export default Mixin.create({
     if (isNone(this.outEffect)) {
       this.outEffect = this.inEffect;
 
-    } else if (!!KEYFRAMES_MAP[this.outDirection].out[this.outEffect]) {
+    } else if (!KEYFRAMES_MAP[this.outDirection].out[this.outEffect]) {
       warn(warningPreface, `Invalid \`outEffect\`: ${this.outEffect}. Defaulting to ${this.inEffect}`);
       this.outEffect = this.inEffect;
     }
@@ -432,13 +432,13 @@ export default Mixin.create({
     const currentAnimationTimingFunction = this.get('currentAnimationTimingFunction');
 
     // inDelay / outDelay
-    const currentDelay = this.get('showItems') ? this.get('inDelay') : this.get('outDelay');    
-    
+    const currentDelay = this.get('showItems') ? this.get('inDelay') : this.get('outDelay');
+
     const animationPrefix = this.get('_animationPrefix');
     const propertyPrefix = animationPrefix ? `${animationPrefix}A` : 'a';
-    
+
     this._listItemElems.forEach((listItemElem, idx) => {
-      listItemElem.style[`${propertyPrefix}nimationDelay`] = `${(currentStaggerInterval * (idx + 1)) + currentDelay}ms`;    
+      listItemElem.style[`${propertyPrefix}nimationDelay`] = `${(currentStaggerInterval * (idx + 1)) + currentDelay}ms`;
       listItemElem.style[`${propertyPrefix}nimationTimingFunction`] = currentAnimationTimingFunction;
       listItemElem.style[`${propertyPrefix}nimationDuration`] = currentAnimationDuration;
       listItemElem.style[`${propertyPrefix}nimationName`] = currentAnimationName;
