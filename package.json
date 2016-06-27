@@ -13,7 +13,7 @@
   },
   "repository": "https://github.com/BrianSipple/ember-stagger-swagger",
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 4.2.x"
   },
   "author": "Brian Sipple <@Brian_Sipple>",
   "license": "MIT",
