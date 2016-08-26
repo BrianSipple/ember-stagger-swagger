@@ -259,11 +259,10 @@ export default Mixin.create({
 
   _initAnimationCallbacks () {
 
-    this._onStaggerStart = function onStaggerStart (event) {
+    this._onStaggerStart = run.bind(this, function onStaggerStart (event) {
       this.set('isAnimating', true);
       this.send('broadcastAnimationStart', event);
-
-    }.bind(this);
+    });
 
     /**
     * AnimationEvent listener for the `animationend` event fired by each
@@ -274,7 +273,7 @@ export default Mixin.create({
     * update `hasListToggled` (if necessary), `isAnimating`, and
     * tell our `broadcastAnimationComplete` action to fire
     */
-    this._onStaggerComplete = function onStaggerComplete (event) {
+    this._onStaggerComplete = run.bind(this, function onStaggerComplete (event) {
       // only update the DOM after we've finished animating all items
       const hasListToggled = this.get('hasListToggled');
       const lastListItemElem = this._listItemElems[this._listItemElems.length - 1];
@@ -293,8 +292,7 @@ export default Mixin.create({
           this.send('broadcastAnimationComplete', event);
         });
       }
-
-    }.bind(this);
+    });
   },
 
   _syncWithDOM () {
